@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/v1/developers")
+@RequestMapping("/full")
 public class DeveloperRestControllerV1 {
     private final List<Developer> DEVELOPERS = Stream.of(
             new Developer(1L, "Ivan", "Ivanov"),
@@ -22,25 +22,6 @@ public class DeveloperRestControllerV1 {
         return DEVELOPERS;
     }
 
-    @GetMapping("/{id}")
-  //  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
-    public Developer getById(@PathVariable Long id) {
-        return DEVELOPERS.stream()
-                .filter(developer -> developer.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
 
-    @PostMapping
-  //  @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Developer create(@RequestBody Developer developer) {
-        this.DEVELOPERS.add(developer);
-        return developer;
-    }
 
-    @DeleteMapping("/{id}")
-  //  @PreAuthorize("hasAuthority('developers:write')")
-    public void deleteById(@PathVariable Long id) {
-        this.DEVELOPERS.removeIf(developer -> developer.getId().equals(id));
-    }
 }

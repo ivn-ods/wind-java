@@ -1,6 +1,5 @@
 package net.proselyte.springsecurity.config;
 
-import net.proselyte.springsecurity.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -30,15 +29,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                 .loginPage("/auth/login").permitAll()
                 .defaultSuccessUrl("/success");
-//                .and()
-//                .logout()
-//                // use this first
-//                //.logoutUrl("/auth/logout")
-//                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))
-//                .invalidateHttpSession(true)
-//                .clearAuthentication(true)
-//                .deleteCookies("JSESSIONID")
-//                .logoutSuccessUrl("/auth/login");
     }
 
     @Bean
@@ -47,11 +37,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new InMemoryUserDetailsManager(
                 User.builder().username("admin")
                         .password(passwordEncoder().encode("admin"))
-                        .authorities(Role.ADMIN.getAuthorities())
+                        .authorities("ADmINROLE")
                         .build(),
                 User.builder().username("user")
                         .password(passwordEncoder().encode("user"))
-                        .authorities(Role.USER.getAuthorities())
+                        .authorities("USERROLE")
                         .build()
         );
     }
