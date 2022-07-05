@@ -1,7 +1,6 @@
-package net.proselyte.springsecurity.rest;
+package ua.od.wind.rest;
 
-import net.proselyte.springsecurity.model.Developer;
-import org.springframework.security.access.prepost.PreAuthorize;
+import ua.od.wind.model.Developer;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

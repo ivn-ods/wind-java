@@ -1,4 +1,4 @@
-package net.proselyte.springsecurity;
+package ua.od.wind;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

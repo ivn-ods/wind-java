@@ -1,4 +1,4 @@
-package net.proselyte.springsecurity.config;
+package ua.od.wind.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

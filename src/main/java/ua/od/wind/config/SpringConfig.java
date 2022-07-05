@@ -1,4 +1,4 @@
-package net.proselyte.springsecurity.config;
+package ua.od.wind.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,7 +32,6 @@ import java.util.Properties;
 
 
 @Configuration
-@ComponentScan("ua.od.wind")
 @PropertySource("classpath:hibernate.properties")
 @EnableTransactionManagement
 @EnableWebMvc

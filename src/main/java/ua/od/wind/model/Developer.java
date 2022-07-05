@@ -1,4 +1,4 @@
-package net.proselyte.springsecurity.model;
+package ua.od.wind.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
