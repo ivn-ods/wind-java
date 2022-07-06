@@ -18,8 +18,13 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(name = "role")
-    private Role role;
+    @Transient
+    private String passwordConfirm;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
 
 }

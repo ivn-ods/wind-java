@@ -1,8 +1,8 @@
 package ua.od.wind.dao;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ua.od.wind.model.User;
-import ua.od.wind.security.UserDetailsServiceImpl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -13,9 +13,6 @@ import java.util.Optional;
 
 @Repository
 public class UserDAO {
-
-
-
 
     @PersistenceContext
     private EntityManager em;
@@ -32,12 +29,12 @@ public class UserDAO {
 
 
     }
-//    public void save(UserDetailsImpl user) {
-//        em.getTransaction().begin();
-//        em.persist(user);
-//        em.getTransaction().commit();
-//    }
-//
+    @Transactional
+    public void saveUser(User user) {
+        em.persist(user);
+    }
+
+
 //    public List<UserDetailsImpl> findAll() {
 //return null;
 //    }

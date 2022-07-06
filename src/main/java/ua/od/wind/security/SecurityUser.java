@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import ua.od.wind.model.User;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -65,7 +66,8 @@ public class SecurityUser implements UserDetails {
                 true,
                 true,
                 true,
-                user.getRole().getAuthorities()
+                Collections.singletonList( new SimpleGrantedAuthority("USER"))
+
         );
-    }
+    };
 }

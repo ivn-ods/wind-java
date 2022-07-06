@@ -15,6 +15,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -138,5 +139,9 @@ public class SpringConfig implements WebMvcConfigurer {
         ByteArrayHttpMessageConverter byteArrayConverter = new ByteArrayHttpMessageConverter();
         byteArrayConverter.setSupportedMediaTypes(new ArrayList<MediaType>(Arrays.asList(MediaType.IMAGE_PNG)));
         return byteArrayConverter;
+    }
+    @Bean
+    protected BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
     }
 }

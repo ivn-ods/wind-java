@@ -1,0 +1,35 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+</head>
+<body>
+<p>My register page</p>
+<div class="container">
+    <form  method="post"  action="/register" modelAttribute="userForm">
+        <h2 class="form-signin-heading">Login</h2>
+        <p>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+        </p>
+        <p>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+        </p>
+        <p>
+            <label for="password">Password</label>
+            <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" placeholder="Password again" required>
+        </p>
+        <p>
+            <label for="email">email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="email" required>
+        </p>
+        <p>
+            <label for="phone">phone</label>
+            <input type="phone" id="phone" name="phone" class="form-control" placeholder="phone" required>
+        </p>
+        <button  type="submit">Register now</button>
+    </form>
+</div>
+</body>
+</html>
