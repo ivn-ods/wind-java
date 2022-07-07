@@ -1,4 +1,6 @@
-<html lang="en">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org">
 <head th:replace="/layout :: head"></head>
 <body>
 <div th:replace="/layout :: buttons"></div>
@@ -12,11 +14,16 @@
     <a href="../contact">Contact</a>
 </div>
 <div  align="center"  style="margin-top:20px">
-    <form  method="post"  action="/register" modelAttribute="userForm">
+    <form  method="post" modelAttribute="userForm" action="/register" th:object="${userForm}">
+        <p style = "color:red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+        <p style = "color:red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <p style = "color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        <p style = "color:red" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></p>
 
         <p>
             <label for="username">Username:</label></br>
-            <input type="text" id="username" name="username" class="form-control"  required>
+            <input type="text" th:field="*{username}" id ="username">
+
         </p>
         <p>
             <label for="password">Password:</label></br>
@@ -28,11 +35,11 @@
         </p>
         <p>
             <label for="email">email:</label></br>
-            <input type="email" id="email" name="email" class="form-control"  required>
+            <input type="text" id="email" name="email" class="form-control"  required>
         </p>
         <p>
             <label for="phone">phone</label></br>
-            <input type="phone" id="phone" name="phone" class="form-control"  required>
+            <input type="phone" id="phone" name="phone" class="form-control" >
         </p>
         <button  type="submit" style="font-size: 16px; color:white;  background-image:url('img/btn.png'); height: 30px; width: 350px;">Register  and proceed to payment</button>
     </form>
