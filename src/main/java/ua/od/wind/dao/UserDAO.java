@@ -21,14 +21,20 @@ public class UserDAO {
 //        return  Optional.of(em.find(UserDetailsImpl.class, id));
 //    }
 
-    public Optional<User> findByUsername(String username){
-
+    public List<User> getUserListByUsername(String username){
         TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.username = :name", User.class)
                 .setParameter("name", username);
-        return  Optional.of(query.getSingleResult());
-
+        return  query.getResultList();
 
     }
+
+    public Optional<User> findByPaymentId(String paymentId){
+        TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.paymentId = :paymentId", User.class)
+                .setParameter("paymentId", paymentId);
+        return  Optional.of(query.getSingleResult());
+
+    }
+
     @Transactional
     public void saveUser(User user) {
         em.persist(user);

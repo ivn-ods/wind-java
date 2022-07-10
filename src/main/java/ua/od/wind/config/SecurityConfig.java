@@ -10,7 +10,12 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import ua.od.wind.security.UserDetailsServiceImpl;
+import ua.od.wind.service.LoginHandler;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
@@ -19,11 +24,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final DataSource dataSource;
+    private final LoginHandler loginHandler;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder, DataSource dataSource, LoginHandler loginHandler) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.passwordEncoder = passwordEncoder;
+        this.dataSource = dataSource;
+        this.loginHandler = loginHandler;
     }
 
     @Override
@@ -38,14 +47,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/shifted", "/register").permitAll()
-                .anyRequest()
-                .authenticated()
+                    .antMatchers("/main", "/pay").authenticated()
+                    .anyRequest().permitAll()
                 .and()
-                .formLogin()
-                .loginPage("/login").permitAll()
-                .defaultSuccessUrl("/main")
-               ;
+                    .formLogin()
+                    .loginPage("/login").permitAll()
+                    .successHandler(loginHandler)
+                    .defaultSuccessUrl("/main")
+                .and()
+                    .rememberMe().key("JHGsf6asdfghj234J").tokenValiditySeconds(365*24*3600)
+                    .tokenRepository(persistentTokenRepository())
+                ;
+
+
+//                .csrf().disable()
+//                .authorizeRequests()
+//                .antMatchers("/shifted", "/register", "/callback", "/pay").permitAll()
+//                .anyRequest()
+//                .authenticated()
+//                .and()
+//                .formLogin()
+//                .loginPage("/login").permitAll()
+//                .defaultSuccessUrl("/main")
+//                .and()
+//                .rememberMe().key("uniqueAndSecret").tokenValiditySeconds(365*24*3600)
+//               ;
     }
 
     @Override
@@ -61,6 +87,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         daoAuthenticationProvider.setUserDetailsService(userDetailsServiceImpl);
         return daoAuthenticationProvider;
     }
+
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl tokenRepo = new JdbcTokenRepositoryImpl();
+        tokenRepo.setDataSource(dataSource);
+        return tokenRepo;
+    }
+
+
 
 
 }

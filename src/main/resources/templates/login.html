@@ -1,30 +1,27 @@
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Please sign in</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-    <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/>
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org">
+<head th:replace="/layout :: head"></head>
 <body>
-<div class="container">
-    <p>My login page</p>
-    <form class="form-signin" method="post" action="/login">
-        <h2 class="form-signin-heading">Please sign in</h2>
+<div th:replace="/layout :: buttons"></div>
+<div  align="center" style="margin-top:30px; padding-left:20px">
+    <h3>You need to login to proceed</h3>
+</div>
+<div  align="center"  style="margin-top:20px">
+    <form  method="post" action="/login">
+
         <p>
-            <label for="username" class="sr-only">Username</label>
+            <label for="username">Username:</label></br>
             <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+
         </p>
         <p>
-            <label for="password" class="sr-only">Password</label>
+            <label for="password">Password:</label></br>
             <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
         </p>
-        <input name="_csrf" type="hidden" value="7b7c5f20-6f1c-4940-8998-dfcaa5fc933c" />
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <input type="checkbox" name="remember-me" style="display:none" checked="checked" />
+        <button  type="submit" style="font-size: 16px; color:white;  background-image:url('img/btn.png'); height: 30px; width: 180px;">Log me in</button>
     </form>
 </div>
-</body></html>
+</body>
+</html>
