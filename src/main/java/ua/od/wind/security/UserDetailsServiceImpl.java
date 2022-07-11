@@ -28,8 +28,5 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             new UsernameNotFoundException("User doesn't exists"));
         return SecurityUser.fromUser(user);
     }
-//    User user = userDAO.findByUsername(username).orElseThrow(() ->
-//            new UsernameNotFoundException("User doesn't exists"));
-//        return SecurityUser.fromUser(user);
 
 }

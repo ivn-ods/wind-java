@@ -1,7 +1,7 @@
 package ua.od.wind.ImageGenerators;
 
 import org.springframework.stereotype.Component;
-import ua.od.wind.models.WindProcessed;
+import ua.od.wind.model.WindProcessed;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,9 +18,9 @@ import java.io.File;
 @Component
 public class Arrow {
 
-    public static void generate(List<WindProcessed> windsProcessed, String path) throws IOException {
+    public static void generate(List<WindProcessed> windsProcessed, String path, String imgFolder) throws IOException {
 
-        File file = new File("C:\\java\\wind.boot\\src\\main\\java\\ua\\od\\wind\\ImageGenerators\\sources\\map_"+ windsProcessed.get(0).getSensorId() +".png");
+        File file = new File(imgFolder + "/sources/map_"+ windsProcessed.get(0).getSensorId() +".png");
         BufferedImage image = ImageIO.read(file);
         Graphics2D g2d = image.createGraphics();
 

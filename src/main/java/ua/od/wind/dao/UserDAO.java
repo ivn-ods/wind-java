@@ -17,10 +17,6 @@ public class UserDAO {
     @PersistenceContext
     private EntityManager em;
 
-//    public Optional<UserDetailsImpl> findById(Long id) {
-//        return  Optional.of(em.find(UserDetailsImpl.class, id));
-//    }
-
     public List<User> getUserListByUsername(String username){
         TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.username = :name", User.class)
                 .setParameter("name", username);
@@ -41,7 +37,4 @@ public class UserDAO {
     }
 
 
-//    public List<UserDetailsImpl> findAll() {
-//return null;
-//    }
 }

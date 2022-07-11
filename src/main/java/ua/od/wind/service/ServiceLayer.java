@@ -3,13 +3,16 @@ package ua.od.wind.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ua.od.wind.ImageGenerators.Arrow;
 import ua.od.wind.ImageGenerators.Chart;
 import ua.od.wind.dao.WindDAO;
-import ua.od.wind.models.Sensor;
-import ua.od.wind.models.Wind;
-import ua.od.wind.models.WindProcessed;
+import ua.od.wind.model.Sensor;
+import ua.od.wind.model.Wind;
+import ua.od.wind.model.WindProcessed;
 
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
@@ -35,20 +38,23 @@ public class ServiceLayer {
     private final Arrow arrow;
     private final int dataLimit;
     private final int dataOffset;
+    private final String imgFolder;
+    private final UserService userService;
 
     @PersistenceContext
     private EntityManager em;
 
 
     @Autowired
-    public ServiceLayer( WindDAO windDAO,
-                         Chart chart, Arrow arrow, Environment env
-    ) {
+    public ServiceLayer(WindDAO windDAO, Chart chart, Arrow arrow, Environment env,
+                        UserService userService) {
         this.windDAO = windDAO;
         this.chart = chart;
         this.arrow = arrow;
         this.dataLimit = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_limit")));
         this.dataOffset = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_offset")));
+        this.imgFolder = Objects.requireNonNull(env.getProperty("img_generated_folder"));
+        this.userService = userService;
     }
 
 
@@ -71,7 +77,7 @@ public class ServiceLayer {
         hash_calc += min + mid + max + dir + v0 + v1 + temp + res;
 
         Sensor sensor = windDAO.getSensorByImei(imei);
-
+//TODO: add hashcalc check
         if (true) {
             System.out.println("Calc ok!");
             if (sensor != null) {
@@ -105,11 +111,11 @@ public class ServiceLayer {
     public void generateCharts(Sensor sensor) throws IOException {
 
         List<WindProcessed> windsProcessed =  this.getProcessedWindData(sensor, dataLimit, 0);
-        String path = "C:\\java\\wind\\src\\main\\java\\ua\\od\\wind\\ImageGenerators\\charts\\chart_" + sensor.getId() +".png";
+        String path = imgFolder + "/charts/chart_" + sensor.getId()  +".png";
         chart.generate(windsProcessed,  path);
 
         windsProcessed = this.getProcessedWindData(sensor, dataLimit, dataOffset);
-        path = "C:\\java\\wind\\src\\main\\java\\ua\\od\\wind\\ImageGenerators\\charts\\chart_offset_" + sensor.getId() +".png";
+        path = imgFolder + "/charts/chart_offset_" + sensor.getId()  +".png";
         chart.generate(windsProcessed,  path);
 
     }
@@ -117,14 +123,13 @@ public class ServiceLayer {
     public void generateArrows(Sensor sensor) throws IOException {
 
         List<WindProcessed> windsProcessed =  this.getProcessedWindData(sensor, 1, 0);
-        String path = "C:\\java\\wind\\src\\main\\java\\ua\\od\\wind\\ImageGenerators\\arrows_on_maps\\map_" + sensor.getId() +".png";
+        String path = imgFolder + "/arrows_on_maps/map_" + sensor.getId()  +".png";
 
-        arrow.generate(windsProcessed,  path);
+        arrow.generate(windsProcessed,  path, imgFolder);
 
         windsProcessed = this.getProcessedWindData(sensor, 1, dataOffset);
-        path = "C:\\java\\wind\\src\\main\\java\\ua\\od\\wind\\ImageGenerators\\arrows_on_maps\\map_offset" + sensor.getId() +".png";
-
-        arrow.generate(windsProcessed,  path);
+        path = imgFolder + "/arrows_on_maps/map_offset_" + sensor.getId()  +".png";
+        arrow.generate(windsProcessed,  path, imgFolder);
 
     }
 
@@ -204,5 +209,17 @@ public class ServiceLayer {
     }
 
 
-
+    public int getDataOffset() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if ( (authentication instanceof AnonymousAuthenticationToken)) {
+            return this.dataOffset;
+        }
+        else {
+            if (authentication != null && authentication.getAuthorities().stream().anyMatch
+                    (a -> a.getAuthority().equals("PAYED"))) {
+                return 0;
+            }
+            else return this.dataOffset;
+        }
+    }
 }

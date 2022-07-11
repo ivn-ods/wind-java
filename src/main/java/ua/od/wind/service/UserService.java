@@ -5,8 +5,12 @@ import com.liqpay.LiqPayUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,8 @@ public class UserService {
     private final Environment env;
     private final JSONParser jsonParser = new JSONParser();
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env) {
         this.env = env;
         this.liqpay = new LiqPay(this.env.getRequiredProperty("public_key"), this.env.getRequiredProperty("private_key"));
@@ -36,27 +42,7 @@ public class UserService {
     }
 
 
-    public User getUserByUsernameX(String username) throws UsernameNotFoundException {
-        List<User> userList = userDAO.getUserListByUsername(username);
-        if (userList.size() == 1) {
-            return userList.get(0);
-        }
-        else {
-            throw new UsernameNotFoundException("User doesn't exists");
-        }
 
-    }
-
-//    public User getUserByUsername(String username) throws UsernameNotFoundException {
-//        return userDAO.findByUsername(username).orElseThrow(() ->
-//                new UsernameNotFoundException("User doesn't exists"));
-//
-//    }
-
-//    public Optional<User> getOptionalUserByUsername(String username) throws UsernameNotFoundException {
-//        return userDAO.findByUsername(username);
-//
-//    }
 
     public String saveUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -64,7 +50,7 @@ public class UserService {
         user.setRegisterDate(date);
         String paymentId = UUID.randomUUID().toString();
         user.setPaymentIdBase(paymentId);
-        user.setUserStatus(UserStatus.INACTIVE);
+        user.setUserStatus(UserStatus.NOTPAYED);
 
         userDAO.saveUser(user);
         return paymentId;
@@ -127,6 +113,7 @@ public class UserService {
         user.setTransactionId( (String)dataInMap.get("transaction_id") );
         user.setPaymentIdBase(UUID.randomUUID().toString());
         user.setPaymentId((String)dataInMap.get("order_id") );
+        user.setUserStatus(UserStatus.PAYED);
         userDAO.saveUser(user);
         return "Payment confirmed";
 
@@ -134,7 +121,7 @@ public class UserService {
 
 
     // Check if account is expired today
-    public void checkUserStatus(Authentication authentication) {
+    public Boolean isAccountExpire(Authentication authentication) {
 
         User user = this.getOptionalUserByUsername(authentication.getName()).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
@@ -145,25 +132,28 @@ public class UserService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate payDate = LocalDate.parse(user.getPayDate(), formatter);
             LocalDate expiryDate = payDate.plusYears(1);
-            UserStatus status = expiryDate.isAfter(LocalDate.now()) ?  UserStatus.ACTIVE :  UserStatus.INACTIVE;
+            Boolean expire =  !expiryDate.isAfter(LocalDate.now());
+            return  expire;
 
             // Update user status in DB if today it was expired
-            if (user.getUserStatus() != status ) {
-                user.setUserStatus(status);
-                userDAO.saveUser(user);
-            }
+//            if (user.getUserStatus() != status ) {
+//                user.setUserStatus(status);
+//                userDAO.saveUser(user);
+//            }
         }
-
-
+        return true;
     }
 
-//    public List<User> getUserListByUsername(String username) {
-//        return userDAO.findByUsername(username);
-//
-//    }
+
+
 
     public Optional<User> getOptionalUserByUsername(String username) {
         return userDAO.getUserListByUsername(username).stream().findFirst();
 
+    }
+
+
+    public void checkUserStatus(Authentication authentication) {
+        logger.info("log success");
     }
 }

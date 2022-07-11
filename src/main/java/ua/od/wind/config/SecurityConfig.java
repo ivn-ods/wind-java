@@ -28,16 +28,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final LoginHandler loginHandler;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder, DataSource dataSource, LoginHandler loginHandler) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder, DataSource dataSource) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.passwordEncoder = passwordEncoder;
         this.dataSource = dataSource;
-        this.loginHandler = loginHandler;
+        this.loginHandler = new LoginHandler("/main");
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
         web
+                //.debug(true)
                 .ignoring()
                 .antMatchers("/img/**");
     }
@@ -47,13 +48,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/main", "/pay").authenticated()
+                    .antMatchers( "/pay").authenticated()
                     .anyRequest().permitAll()
                 .and()
                     .formLogin()
-                    .loginPage("/login").permitAll()
-                    .successHandler(loginHandler)
-                    .defaultSuccessUrl("/main")
+                    .loginPage("/login")
+                .successHandler(loginHandler)
+                .defaultSuccessUrl("/main",true)
+                .permitAll()
+
                 .and()
                     .rememberMe().key("JHGsf6asdfghj234J").tokenValiditySeconds(365*24*3600)
                     .tokenRepository(persistentTokenRepository())

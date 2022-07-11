@@ -1,4 +1,4 @@
-package ua.od.wind.models;
+package ua.od.wind.model;
 
 import javax.persistence.*;
 
@@ -39,9 +39,6 @@ public class Wind {
     public void setSensorId(int sensorId) {
         this.sensorId = sensorId;
     }
-
-
-
 
     public int getMin() {
         return min;

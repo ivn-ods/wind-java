@@ -59,6 +59,49 @@
         <a href="../../contact"><li>Contact</li></a>
     </ul>
 </div>
+
+<div  class="center" th:fragment="login_form_main">
+    <div class="center" style="margin-top:20px; text-align:center; padding-left:10px">
+        <div style="width:80px; float:left">
+            <div style="height:22px;">
+                Login:
+            </div>
+            <div>
+                Password:
+            </div>
+        </div>
+        <form method="POST" action="/login">
+            <div style="width:100px;  float:left">
+                <div style="height:22px;">
+                    <input type="text" id="username" name="username" style="width:100px"  required autofocus>
+                </div>
+                <div>
+                    <input type="password" id="password" name="password" style="width:100px" required>
+                </div>
+                <input type="checkbox" name="remember-me" style="display:none" checked="checked" />
+            </div>
+
+            <div style=" float:left">
+                <input name="submit_button" size="10" value="Login" style="font-size: 15px; color:white;  background-image:url('img/btn.png'); height: 44px;" type="submit">
+
+            </div>
+        </form>
+        <div style="width:347px;  float:left">
+            <div style="float:left; padding-left:10px">
+                 <span style="color:red"><b>You entered as guest. Data displayed with delay!</b></span>
+            </div>
+
+        </div>
+        <form action="/register">
+            <div style="float:right; padding-right:30px">
+                <button type="submit" style="font: 15px Verdana; color:white; height:44px; background-image:url('img/btn.png');">Get<br>Access</button>
+            </div>
+        </form>
+    </div>
+    <div style="clear:both"></div>
+</div>
+
+
 <body>
 
 </body>

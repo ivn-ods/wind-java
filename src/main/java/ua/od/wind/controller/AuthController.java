@@ -1,6 +1,8 @@
 package ua.od.wind.controller;
 
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,18 +22,18 @@ import java.security.Principal;
 @Controller
 public class AuthController {
 
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
     private final UserService userService;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public AuthController(UserDetailsServiceImpl userDetailsServiceImpl,  UserService userService) {
-        this.userDetailsServiceImpl = userDetailsServiceImpl;
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("login")
     public String getLoginPage() {
+        logger.info("just login");
         return "login";
     }
 
@@ -57,7 +59,6 @@ public class AuthController {
         }
 
         String paymentId= userService.saveUser(userForm);
-
         return "redirect:/pay";
     }
 

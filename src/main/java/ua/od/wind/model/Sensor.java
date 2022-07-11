@@ -1,4 +1,4 @@
-package ua.od.wind.models;
+package ua.od.wind.model;
 
 import javax.persistence.*;
 

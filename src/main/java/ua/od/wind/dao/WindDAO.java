@@ -2,8 +2,8 @@ package ua.od.wind.dao;
 
 
 import org.springframework.stereotype.Repository;
-import ua.od.wind.models.Sensor;
-import ua.od.wind.models.Wind;
+import ua.od.wind.model.Sensor;
+import ua.od.wind.model.Wind;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

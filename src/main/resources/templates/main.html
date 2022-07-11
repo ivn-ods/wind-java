@@ -1,10 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org">
+<head th:replace="layout :: head"></head>
 <body>
-<p>Main!</p>
+<div th:replace="layout :: buttons"></div>
+<div th:if="${offset != 0}">
+    <div th:replace="layout :: login_form_main"></div>
+</div>
+
+
+<th:block th:each="key : ${sensors.keySet()}">
+    <div align="center" style="margin-top:10px; font-size:17px; height:100%"> Wind at <b th:utext="${sensors.get(key).enName}"></b> на
+        <b th:utext="${winds.get(key).get(0).getHourStr()}+':'+${winds.get(key).get(0).getMinuteStr()}"></b>
+        <a th:href="@{/table/(key)}">table</a></div>
+
+
+    <div align="center" style="margin-top:5px">
+
+        <table border="0" cellpadding="0" cellspacing="0">
+            <tbody align="left" style="font-size:20px; font-weight:bold; font: 20px Verdana">
+            <tr>
+                <td height="18px" colspan="2"></td>
+                <td rowspan="6">
+                    <img th:src="'../../chart/' + ${key}" th:alt="${key}"/>
+
+                </td>
+            </tr>
+            <tr>
+                <td class="s_font">Max</td>
+                <td align="center" class="s_font" th:utext="${winds.get(key).get(0).max}"></td>
+
+            </tr>
+            <tr>
+                <td height="40">Mid</td>
+                <td align="center" th:utext="${winds.get(key).get(0).mid}"></td>
+            </tr>
+            <tr>
+                <td class="s_font" style="height: 20px">Min</td>
+                <td align="center" class="s_font" style="height: 20px" th:utext="${winds.get(key).get(0).min}"></td></tr>
+            <tr>
+                <td>t<span style="font-size:7pt; font-family: Arial, Helvetica, sans-serif">on the sun</span></td>
+                <td align="center" class="s_font" th:utext="${winds.get(key).get(0).temp}"> °С</td>
+            </tr>
+            <tr>
+                <td style="vertical-align:top" colspan="2">
+                <img th:src="'../../arrow/' + ${key}" th:alt="${winds.get(key).get(0).dir}"/>
+                </td>
+            </tr>
+            </tbody></table>
+    </div>
+
+</th:block>
+
+
+
+
+
+
 </body>
 </html>

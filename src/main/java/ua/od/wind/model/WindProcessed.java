@@ -1,4 +1,4 @@
-package ua.od.wind.models;
+package ua.od.wind.model;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

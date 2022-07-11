@@ -1,7 +1,7 @@
 package ua.od.wind.ImageGenerators;
 
 import org.springframework.stereotype.Component;
-import ua.od.wind.models.WindProcessed;
+import ua.od.wind.model.WindProcessed;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

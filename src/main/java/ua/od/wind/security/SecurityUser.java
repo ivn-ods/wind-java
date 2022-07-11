@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ua.od.wind.model.User;
+import ua.od.wind.model.UserStatus;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +67,9 @@ public class SecurityUser implements UserDetails {
                 true,
                 true,
                 true,
-                Collections.singletonList( new SimpleGrantedAuthority("USER"))
+                (user.getUserStatus() == UserStatus.PAYED) ?
+                        Collections.singletonList( new SimpleGrantedAuthority("PAYED")) :
+                        Collections.singletonList( new SimpleGrantedAuthority("NOTPAYED"))
 
         );
     };
