@@ -119,29 +119,11 @@ public class UserService {
 
     }
 
-
-    // Check if account is expired today
-    public Boolean isAccountExpire(Authentication authentication) {
-
-        User user = this.getOptionalUserByUsername(authentication.getName()).orElseThrow(() ->
-                new UsernameNotFoundException("User doesn't exists"));
-
-        //user was registered but not payed
-        //We make user inactive only who payed
-        if (user.getPayDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            LocalDate payDate = LocalDate.parse(user.getPayDate(), formatter);
-            LocalDate expiryDate = payDate.plusYears(1);
-            Boolean expire =  !expiryDate.isAfter(LocalDate.now());
-            return  expire;
-
-            // Update user status in DB if today it was expired
-//            if (user.getUserStatus() != status ) {
-//                user.setUserStatus(status);
-//                userDAO.saveUser(user);
-//            }
-        }
-        return true;
+    public String getUserFromContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String name = authentication.getName();
+        if (name.equals("anonymousUser")) name = "Guest";
+        return name;
     }
 
 
@@ -152,8 +134,25 @@ public class UserService {
 
     }
 
-
+    // Check if account not expired every login.
+    // Ovaerwise set user NOTPAYED
     public void checkUserStatus(Authentication authentication) {
-        logger.info("log success");
+        logger.info("Checking user status");
+        User user = this.getOptionalUserByUsername(authentication.getName()).orElseThrow(() ->
+                new UsernameNotFoundException("User doesn't exists"));
+
+
+        if (user.getPayDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            LocalDate payDate = LocalDate.parse(user.getPayDate(), formatter);
+            LocalDate expiryDate = payDate.plusYears(1);
+            boolean expire =  !expiryDate.isAfter(LocalDate.now());
+
+           //  Update user status in DB if today it was expired
+            if (expire && user.getUserStatus() == UserStatus.PAYED) {
+                user.setUserStatus(UserStatus.NOTPAYED);
+                userDAO.saveUser(user);
+            }
+        }
     }
 }

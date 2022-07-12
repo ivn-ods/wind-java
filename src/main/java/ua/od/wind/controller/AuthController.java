@@ -33,7 +33,6 @@ public class AuthController {
 
     @GetMapping("login")
     public String getLoginPage() {
-        logger.info("just login");
         return "login";
     }
 

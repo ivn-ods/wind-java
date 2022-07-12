@@ -1,6 +1,5 @@
 package ua.od.wind.controller;
 
-import org.apache.catalina.connector.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -18,11 +17,7 @@ import ua.od.wind.service.ServiceLayer;
 import ua.od.wind.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -45,11 +40,18 @@ public class DataController {
         this.imgFolder = Objects.requireNonNull(env.getProperty("img_generated_folder"));
     }
 
+    @GetMapping("/about")
+    public String about() {  return "about"; }
+
+    @GetMapping("/contact")
+    public String contact() {  return "contact"; }
+
+
+
 
     @GetMapping("/main")
     public String index(Model model) {
         //Data will be shown with offset for not active users and guests
-        //TODO: make offset for users who not payed
         int offset = serviceLayer.getDataOffset();
 
         List<Sensor> enabledSensors = serviceLayer.getEnabledSensors();
@@ -63,10 +65,11 @@ public class DataController {
         model.addAttribute("offset", offset);
         model.addAttribute("winds", windsMap);
         model.addAttribute("sensors", sensorsMap);
-
+        model.addAttribute("username", userService.getUserFromContext());
         return "main";
     }
 
+    //test with this:
     //http://localhost/save?p0=2790&p1=UI000000000000000&p2=124148177815252292104000
     @GetMapping(value ="/save", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
@@ -79,6 +82,7 @@ public class DataController {
         Sensor sensor = serviceLayer.getSensorById(id);
         model.addAttribute("winds", serviceLayer.getProcessedWindData(sensor, dataLimit, serviceLayer.getDataOffset()));
         model.addAttribute("sensor", sensor);
+        model.addAttribute("username", userService.getUserFromContext());
         return "table";
     }
 

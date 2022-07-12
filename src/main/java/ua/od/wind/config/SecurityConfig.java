@@ -10,8 +10,12 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import ua.od.wind.security.UserDetailsServiceImpl;
 import ua.od.wind.service.LoginHandler;
 
@@ -40,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web
                 //.debug(true)
                 .ignoring()
-                .antMatchers("/img/**");
+                .antMatchers("/img/**", "/about", "contact");
     }
 
     @Override
@@ -53,13 +57,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .formLogin()
                     .loginPage("/login")
-                .successHandler(loginHandler)
-                .defaultSuccessUrl("/main",true)
+                // set user satatus by days passed from payment.
+                //dont use .defaultSuccessUrl() because it override successHandler method and set own handler
+                .successHandler(loginHandler())
                 .permitAll()
 
                 .and()
-                    .rememberMe().key("JHGsf6asdfghj234J").tokenValiditySeconds(365*24*3600)
-                    .tokenRepository(persistentTokenRepository())
+                    .rememberMe()
+                    .rememberMeServices(rememberMeServices())
+//                .key("JHGsf6asdfghj234J")
+//                .userDetailsService(userDetailsServiceImpl)
+//                .authenticationSuccessHandler(loginHandler())
+//                .tokenValiditySeconds(365*24*3600)
+//                    .tokenRepository(persistentTokenRepository())
                 ;
 
 
@@ -91,11 +101,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return daoAuthenticationProvider;
     }
 
+
+    //Using persistent remember me will cause "Invalid remember-me token (Series/token) mismatch"
+    //because of loading of authorised content (limited access images) in several requests from browser
     @Bean
-    public PersistentTokenRepository persistentTokenRepository() {
-        JdbcTokenRepositoryImpl tokenRepo = new JdbcTokenRepositoryImpl();
-        tokenRepo.setDataSource(dataSource);
-        return tokenRepo;
+    public RememberMeServices rememberMeServices()  {
+        TokenBasedRememberMeServices result = new TokenBasedRememberMeServices("JHGsf6asdfghj234J", userDetailsServiceImpl);
+        result.setTokenValiditySeconds(365*24*3600);
+        return result;
+    }
+
+
+
+    @Bean
+    public LoginHandler loginHandler() {
+        return new LoginHandler("/main");
     }
 
 

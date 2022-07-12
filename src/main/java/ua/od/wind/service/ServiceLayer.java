@@ -178,9 +178,10 @@ public class ServiceLayer {
             windProcessed.setSensorId(wind.getSensorId());
             windProcessed.setTemp(wind.getTemp()-100);
             float sf = sensor.getSpeedFactor();
-            int max = wind.getMax(); windProcessed.setMin((int)(wind.getMin() / sensor.getSpeedFactor())/10);
-            windProcessed.setMid((int)(wind.getMid() / sensor.getSpeedFactor())/10);
-            windProcessed.setMax((int)(wind.getMax() / sensor.getSpeedFactor())/10);
+            int max = wind.getMax();
+            windProcessed.setMin( ((float)(wind.getMin() / sensor.getSpeedFactor()))/10 );
+            windProcessed.setMid( ((float)(wind.getMid() / sensor.getSpeedFactor()))/10 );
+            windProcessed.setMax( ((float)(wind.getMax() / sensor.getSpeedFactor()))/10 );
             windProcessed.setDay(this.getLDT(wind.getTimestamp()).getDayOfMonth());
 
             int hour = this.getLDT(wind.getTimestamp()).getHour();

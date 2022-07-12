@@ -7,12 +7,13 @@
 <div th:if="${offset != 0}">
     <div th:replace="layout :: login_form_main"></div>
 </div>
-
-
+<div class="center" style="margin-top:5px;  padding-left:20px">
+    <p>You entered as: <b th:text="${username}"></b></p>
+</div>
 <th:block th:each="key : ${sensors.keySet()}">
-    <div align="center" style="margin-top:10px; font-size:17px; height:100%"> Wind at <b th:utext="${sensors.get(key).enName}"></b> на
+    <div align="center" style="margin-top:10px; font-size:17px; height:100%"> Wind in <b th:utext="${sensors.get(key).enName}"></b> на
         <b th:utext="${winds.get(key).get(0).getHourStr()}+':'+${winds.get(key).get(0).getMinuteStr()}"></b>
-        <a th:href="@{/table/(key)}">table</a></div>
+        <a th:href="@{'/table/'+ ${key}}">table</a></div>
 
 
     <div align="center" style="margin-top:5px">
