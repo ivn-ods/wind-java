@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web
                 //.debug(true)
                 .ignoring()
-                .antMatchers("/img/**", "/about", "contact");
+                .antMatchers("/img/**", "/about", "/contact","/save");
     }
 
     @Override
@@ -57,6 +57,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .formLogin()
                     .loginPage("/login")
+
                 // set user satatus by days passed from payment.
                 //dont use .defaultSuccessUrl() because it override successHandler method and set own handler
                 .successHandler(loginHandler())

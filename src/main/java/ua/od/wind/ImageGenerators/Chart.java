@@ -19,10 +19,10 @@ public class Chart {
 
     // Utility class to calculate maximum values in list of datasets
     public static HashMap<String, Double> getMaxValuesFromWindDataPoints(List<WindProcessed> windDataPoints) {
-
-        double minMax=0;
-        double midMax=0;
-        double maxMax=0;
+        // TO prevent division by zero if all points in dataset = 0
+        double minMax=0.01F;
+        double midMax=0.01F;
+        double maxMax=0.01F;
         for ( WindProcessed windDataPoint :  windDataPoints) {
             if ( windDataPoint.getMin() >  minMax) {
                 minMax =  windDataPoint.getMin();
@@ -107,10 +107,7 @@ public class Chart {
         g2d.drawRect(X0,  Y0 - realWidth, realWidth, realHeight);
 
 
-        if ( numOfPoint == 0)  {
-            numOfPoint = 1;
-        } else {
-
+        if ( numOfPoint == 0)  { numOfPoint = 1; }
 
             // Add two points to the right and left of the charts. Values in
             // these points will be taken equal to the extreme ones.
@@ -120,17 +117,14 @@ public class Chart {
             windDataPoints.add(windDataPoints.get(windDataPoints.size()-1));
 
 
-            // Сглаживание графики методом усреднения соседних значений
-            //  for (int i = 2;  i <  count;  i++) {
-            //   windDataPoints.get(i).min = ( windDataPoints.get(i-1).min +  windDataPoints.get(i).min +  windDataPoints.get(i+1).min) / 3;
-            //   windDataPoints.get(i).mid = ( windDataPoints.get(i-1).mid +  windDataPoints.get(i).mid +  windDataPoints.get(i+1).mid) / 3;
-            //   windDataPoints.get(i).max = ( windDataPoints.get(i-1).max +  windDataPoints.get(i).max +  windDataPoints.get(i+1).max) / 3;
-            //if ( windDataPoints.max.get(i)> max)  max= windDataPoints.max.get(i);
-            //    }
+           //  Charts smoothing
+              for (int i = 1;  i <  numOfPoint-1;  i++) {
+                  windDataPoints.get(i).setMin(( windDataPoints.get(i-1).getMin() +  windDataPoints.get(i).getMin() +  windDataPoints.get(i+1).getMin()) / 3);
+                  windDataPoints.get(i).setMid(( windDataPoints.get(i-1).getMid() +  windDataPoints.get(i).getMid() +  windDataPoints.get(i+1).getMid()) / 3);
+                  windDataPoints.get(i).setMax(( windDataPoints.get(i-1).getMax() +  windDataPoints.get(i).getMax() +  windDataPoints.get(i+1).getMax()) / 3);
+                //if ( windDataPoints.max.get(i)> max)  max= windDataPoints.max.get(i);
+                }
             HashMap<String, Double> maxValues = getMaxValuesFromWindDataPoints( windDataPoints);
-            if ( maxValues.get("minMax") == 0)  windDataPoints.get(0).setMax(0.01f);
-            if ( maxValues.get("midMax") == 0)  windDataPoints.get(0).setMid(0.01f);
-            if ( maxValues.get("maxMax") == 0)  windDataPoints.get(0).setMin(0.01f);
 
             //Calculate max value
             max = (int)( maxValues.get("maxMax") * 1.2);
@@ -253,14 +247,10 @@ public class Chart {
                 g2d.drawString(str, X0 - str.length() *  fontWidth -  paddingLeft / 4 - 7,  Y0 -  step *  i + (int)(fontHeight*0.4));
             }
 
-        }
+
 
         ImageIO.write(image, "PNG", new File(path));
 
-        Path currentRelativePath = Paths.get("");
-        System.out.println(currentRelativePath);
-        String s = currentRelativePath.toAbsolutePath().toString();
-        System.out.println(s);
 
     }
 }

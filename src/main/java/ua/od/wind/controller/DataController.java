@@ -70,7 +70,7 @@ public class DataController {
     }
 
     //test with this:
-    //http://localhost/save?p0=2790&p1=UI000000000000000&p2=124148177815252292104000
+    //http://localhost:8080/save?p0=2790&p1=UI000000000000000&p2=124148177815252292104000
     @GetMapping(value ="/save", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String saveWindData(@RequestParam(required = true) int p0, @RequestParam(required = true) String p1, @RequestParam(required = true) String p2) throws  IOException {

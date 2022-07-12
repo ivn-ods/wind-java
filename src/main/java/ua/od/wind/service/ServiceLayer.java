@@ -79,7 +79,6 @@ public class ServiceLayer {
         Sensor sensor = windDAO.getSensorByImei(imei);
 //TODO: add hashcalc check
         if (true) {
-            System.out.println("Calc ok!");
             if (sensor != null) {
                 Wind wind = new Wind();
                 wind.setTimestamp((int) ZonedDateTime.now().toEpochSecond());
@@ -92,6 +91,8 @@ public class ServiceLayer {
                 wind.setV1(v1);
                 wind.setSensorId(sensor.getId());
                 windDAO.saveWind(wind);
+                // remove old data not to flood database
+              //  windDAO.removeWind(sensor.getId());
 
                 this.generateCharts(sensor);
                 this.generateArrows(sensor);
