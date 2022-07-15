@@ -1,0 +1,5 @@
+2562 [main] INFO  u.od.wind.SpringSecurityApplication - Starting SpringSecurityApplication on Acer with PID 4980 (C:\java\wind\target\classes started by Ivan in C:\java\wind)
+2573 [main] INFO  u.od.wind.SpringSecurityApplication - No active profile set, falling back to default profiles: default
+10722 [main] INFO  u.od.wind.SpringSecurityApplication - Started SpringSecurityApplication in 9.787 seconds (JVM running for 13.614)
+31268 [http-nio-8080-exec-2] ERROR ua.od.wind.service.UserService - error
+31269 [http-nio-8080-exec-2] INFO  ua.od.wind.service.UserService - info
