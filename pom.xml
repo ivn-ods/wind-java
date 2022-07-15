@@ -9,16 +9,23 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ua.od.wind</groupId>
-    <artifactId>springsecurity</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>wind-app</artifactId>
+    <version>v0.2</version>
     <name>springsecurity</name>
     <description>Wind</description>
+    <packaging>war</packaging>
 
     <properties>
         <java.version>11</java.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -67,6 +74,13 @@
             <artifactId>liqpay-sdk</artifactId>
             <version>0.7-SNAPSHOT</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-log4j2 -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
 
     </dependencies>
 

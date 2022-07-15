@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.passwordEncoder = passwordEncoder;
         this.dataSource = dataSource;
-        this.loginHandler = new LoginHandler("/main");
+        this.loginHandler = new LoginHandler("/");
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web
                 //.debug(true)
                 .ignoring()
-                .antMatchers("/img/**", "/about", "/contact","/save");
+                .antMatchers("/img/**", "/about", "/contact","/save","/callback");
     }
 
     @Override
@@ -116,10 +116,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public LoginHandler loginHandler() {
-        return new LoginHandler("/main");
+        return new LoginHandler("/");
     }
-
-
 
 
 }

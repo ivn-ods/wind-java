@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://thymeleaf.org">
 <head th:fragment="head">
-    <title>Ветер онлайн в Коблево, Лузановке, Сергеевке</title>
+    <title>Ветер онлайн в Коблево, Лузановке, Сергеевке v1</title>
     <meta name="robots" content="index, follow" />
     <meta name="description" content="Наблюдение за скоростью ветра онлайн при помощи автономных интернет метеостанций. Установить онлайн метеостанцию для измерения скорости ветра в реальном времени." />
     <meta name="keywords" content="онлайн метеостанция, ветер, GSM, анемометр, направление ветра, погода, коблево, лазановка, сергеевка" />
@@ -53,7 +53,7 @@
 
 <div  class="center" th:fragment="buttons">
     <ul class="hr" style="margin-left:10px">
-        <a href="../../main"><li>Main</li></a>
+        <a href="../../"><li>Main</li></a>
         <a href="../../about"> <li>About project</li></a>
         <a href="https://t.me/windodua"><li>News</li></a>
         <a href="../../contact"><li>Contact</li></a>
@@ -93,8 +93,28 @@
 
         </div>
         <form action="/register">
-            <div style="float:right; padding-right:30px">
+            <div style="float:left; padding-right:30px">
                 <button type="submit" style="font: 15px Verdana; color:white; height:44px; background-image:url('img/btn.png');">Get<br>Access</button>
+            </div>
+        </form>
+    </div>
+    <div style="clear:both"></div>
+</div>
+
+
+
+<div  class="center" th:fragment="pay_button">
+    <div class="center" style="margin-top:20px; text-align:center; padding-left:10px">
+
+        <div style="width:347px;  float:left">
+            <div style="float:left; padding-left:10px">
+                <span style="color:red"><b>You are not made payment. Data displayed with delay!</b></span>
+            </div>
+
+        </div>
+        <form action="/pay">
+            <div style="float:left; padding-right:30px">
+                <button type="submit" style="font: 15px Verdana; color:white; height:44px; background-image:url('img/btn.png');">Proceed to<br>checkout</button>
             </div>
         </form>
     </div>

@@ -32,7 +32,9 @@ public class UserService {
     private final Environment env;
     private final JSONParser jsonParser = new JSONParser();
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+   // private  final Logger logger = LogManager.getLogger(UserService.class.getName());
+
 
     public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env) {
         this.env = env;
@@ -44,31 +46,38 @@ public class UserService {
 
 
 
-    public String saveUser(User user){
+    public String saveNewUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         String date =new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         user.setRegisterDate(date);
         String paymentId = UUID.randomUUID().toString();
         user.setPaymentIdBase(paymentId);
         user.setUserStatus(UserStatus.NOTPAYED);
-
         userDAO.saveUser(user);
         return paymentId;
 
     }
 
+    public void saveUser(User user){
+        userDAO.saveUser(user);
+    }
 
+    public String getPaymentIdForThisYear(String  PaymentIdBase) {
+        return PaymentIdBase + "-" + new SimpleDateFormat("yyyy").format(new Date());
+    }
 
 
     public String getPaymentButton(User user) {
-        String currentYear =new SimpleDateFormat("yyyy").format(new Date());
-
         Map<String, String> params = new HashMap<>();
         params.put("action", "pay");
         params.put("amount", env.getRequiredProperty("payment_amount"));
         params.put("currency", "UAH");
-        params.put("description", "Subscribe for "+ user.getUsername() + " for year "+ currentYear);
-        params.put("order_id", user.getPaymentIdBase() + "-"+ currentYear);
+        params.put("description", "Subscribe for "+ user.getUsername() +
+                " for year "+
+                    new SimpleDateFormat("yyyy").format(new Date()) +
+                        "id=" +
+                        this.getPaymentIdForThisYear(user.getPaymentIdBase()));
+        params.put("order_id", this.getPaymentIdForThisYear(user.getPaymentIdBase()));
         params.put("version", "3");
         params.put("sandbox", env.getRequiredProperty("sandbox"));
 
@@ -84,38 +93,36 @@ public class UserService {
      * @throws ParseException
      * @throws java.text.ParseException
      */
-    public String processCallback(String data, String signature) throws ParseException, java.text.ParseException {
-
+    public void processCallback(String data, String signature) throws ParseException, java.text.ParseException {
+        logger.warn("Data:" + data);
+        logger.warn("Signature:" + signature);
 
         String keyDatakey = env.getRequiredProperty("private_key") + data + env.getRequiredProperty("private_key");
         String signatureCalculated = LiqPayUtil.base64_encode(LiqPayUtil.sha1(keyDatakey));
         String dataInJSON = new String(Base64.getDecoder().decode(data));
         JSONObject dataInJSONObj = (JSONObject)jsonParser.parse(dataInJSON);
         HashMap<String, Object> dataInMap = LiqPayUtil.parseJson(dataInJSONObj);
-
         User user = userDAO.findByPaymentId((String)dataInMap.get("order_id")).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
         if (!signature.equals(signatureCalculated)) {
-            return "Signatures not equal";
+            logger.warn((String)dataInMap.get("order_id") + " Signatures not equal");
 
         }
         if (!env.getRequiredProperty("public_key").equals((String)dataInMap.get("public_key"))) {
-            return "Keys not equal";
+            logger.warn((String)dataInMap.get("order_id") + " Keys not equal");
 
         }
         if ( !((String)dataInMap.get("status")).equals("success")
-                || !((String)dataInMap.get("status")).equals("success")) {
-            return "Status not success or sandbox";
+                && !((String)dataInMap.get("status")).equals("sandbox")) {
+            logger.warn((String)dataInMap.get("order_id") + " Status not success or sandbox");
 
         }
         user.setPayDate(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
         user.setPhone( (String)dataInMap.get("sender_phone") );
-        user.setTransactionId( (String)dataInMap.get("transaction_id") );
-        user.setPaymentIdBase(UUID.randomUUID().toString());
-        user.setPaymentId((String)dataInMap.get("order_id") );
+        user.setTransactionId( String.valueOf(dataInMap.get("transaction_id")) );
         user.setUserStatus(UserStatus.PAYED);
         userDAO.saveUser(user);
-        return "Payment confirmed";
+        logger.warn((String)dataInMap.get("order_id") + " payment confirmed");
 
     }
 
@@ -137,12 +144,16 @@ public class UserService {
     // Check if account not expired every login.
     // Ovaerwise set user NOTPAYED
     public void checkUserStatus(Authentication authentication) {
-        logger.info("Checking user status");
-        User user = this.getOptionalUserByUsername(authentication.getName()).orElseThrow(() ->
+
+
+
+        User user = userDAO.getUserByUsername(authentication.getName()).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
+//        User user = userDAO.findByPaymentId((String)dataInMap.get("order_id")).orElseThrow(() ->
+//                new UsernameNotFoundException("User doesn't exists"));
 
 
-        if (user.getPayDate() != null) {
+        if (user.getPayDate() != null && !user.getPayDate().equals("")) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate payDate = LocalDate.parse(user.getPayDate(), formatter);
             LocalDate expiryDate = payDate.plusYears(1);
@@ -151,8 +162,34 @@ public class UserService {
            //  Update user status in DB if today it was expired
             if (expire && user.getUserStatus() == UserStatus.PAYED) {
                 user.setUserStatus(UserStatus.NOTPAYED);
-                userDAO.saveUser(user);
+                userDAO.mergeUser(user);
             }
         }
     }
+
+    //registered but not payed
+    public boolean isUserLoggedInButNotPayed() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null &&
+                !this.isGuest() &&  //not Guest
+                authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("NOTPAYED"));
+    }
+
+    public boolean isUserPayed() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return authentication != null &&
+                !this.isGuest() &&  //not Guest
+                authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("PAYED"));
+
+    }
+
+    public boolean isGuest() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication == null ||
+                (authentication instanceof AnonymousAuthenticationToken);
+
+    }
+
+
 }

@@ -5,11 +5,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import ua.od.wind.ImageGenerators.ArrowSmall;
 import ua.od.wind.model.Sensor;
 import ua.od.wind.model.WindProcessed;
@@ -26,14 +23,14 @@ import java.util.Objects;
 
 @PropertySource("classpath:application.properties")
 @Controller
-public class DataController {
+public class MainController {
     private final ServiceLayer serviceLayer;
     private final UserService userService;
     private final int dataLimit;
     private final String imgFolder;
 
     @Autowired
-    public DataController(ServiceLayer serviceLayer, UserService userService, Environment env) {
+    public MainController(ServiceLayer serviceLayer, UserService userService, Environment env) {
         this.serviceLayer = serviceLayer;
         this.userService = userService;
         this.dataLimit = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_limit")));
@@ -50,22 +47,23 @@ public class DataController {
 
 
     @GetMapping("/")
+    @PostMapping("/")
     public String index(Model model) {
-        //Data will be shown with offset for not active users and guests
-        int offset = serviceLayer.getDataOffset();
-
         List<Sensor> enabledSensors = serviceLayer.getEnabledSensors();
+
         HashMap<Integer, List<WindProcessed>> windsMap = new HashMap<>();
         HashMap<Integer, Sensor> sensorsMap = new HashMap<>();
         HashMap<Integer, Boolean> sensorsIsAlive = new HashMap<>();
+
         for (Sensor sensor: enabledSensors) {
             sensorsIsAlive.put(sensor.getId(), serviceLayer.isSensorAlive(sensor, 1, 0 ));
             //We need only one last datapoint to show in view
-            windsMap.put(sensor.getId(), serviceLayer.getProcessedWindData(sensor, 1, offset ));
+            windsMap.put(sensor.getId(), serviceLayer.getProcessedWindData(sensor, 1, serviceLayer.getDataOffset() ));
             sensorsMap.put(sensor.getId(), sensor);
 
         }
-        model.addAttribute("offset", offset);
+        model.addAttribute("showPayButton", userService.isUserLoggedInButNotPayed());
+        model.addAttribute("showRegisterButton", userService.isGuest());
         model.addAttribute("winds", windsMap);
         model.addAttribute("sensors", sensorsMap);
         model.addAttribute("sensorsIsAlive", sensorsIsAlive);

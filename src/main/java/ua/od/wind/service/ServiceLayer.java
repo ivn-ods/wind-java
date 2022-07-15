@@ -211,17 +211,15 @@ public class ServiceLayer {
     }
 
 
+
     public int getDataOffset() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if ( (authentication instanceof AnonymousAuthenticationToken)) {
-            return this.dataOffset;
-        }
-        else {
-            if (authentication != null && authentication.getAuthorities().stream().anyMatch
-                    (a -> a.getAuthority().equals("PAYED"))) {
-                return 0;
-            }
-            else return this.dataOffset;
-        }
+        if (userService.isUserPayed()) return 0; else return this.dataOffset;
+    }
+
+    //If sensor not send data for a long time we not show data from them
+    public boolean isSensorAlive(Sensor sensor, int dataLimit, int  dataOffset) {
+        List<Wind> windRaw = windDAO.getRawWindData(sensor.getId(), dataLimit, dataOffset);
+        int timeDelay = (int) ZonedDateTime.now().toEpochSecond() - windRaw.get(0).getTimestamp();
+        return timeDelay < 3600 * 3;
     }
 }

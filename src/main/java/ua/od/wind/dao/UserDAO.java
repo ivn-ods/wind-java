@@ -31,9 +31,21 @@ public class UserDAO {
 
     }
 
+    public Optional<User> getUserByUsername(String username){
+        TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.username = :name", User.class)
+                .setParameter("name", username);
+        return  Optional.of(query.getSingleResult());
+
+    }
+
     @Transactional
     public void saveUser(User user) {
         em.persist(user);
+    }
+
+    @Transactional
+    public void mergeUser(User user) {
+        em.merge(user);
     }
 
 

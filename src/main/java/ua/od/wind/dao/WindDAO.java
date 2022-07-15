@@ -21,7 +21,7 @@ public class WindDAO {
     private EntityManager em;
 
     public List<Wind> getRawWindData(int sensorId, int dataLimit, int dataOffset ) {
-       TypedQuery<Wind> query  = em.createQuery("SELECT w from windTable w where w.sensorId = :sid order by w.timestamp", Wind.class)
+       TypedQuery<Wind> query  = em.createQuery("SELECT w from windTable w where w.sensorId = :sid order by w.timestamp desc" , Wind.class)
                 .setParameter("sid", sensorId)
                 .setFirstResult(dataOffset)
                 .setMaxResults(dataLimit);
@@ -34,7 +34,7 @@ public class WindDAO {
 
     public void removeWind(int sensorId) {
         //DELETE FROM wind ORDER BY timestamp limit 1
-        TypedQuery<Wind> query  = em.createQuery("SELECT w from windTable w where w.sensorId = :sid order by w.timestamp", Wind.class)
+        TypedQuery<Wind> query  = em.createQuery("SELECT w from windTable w where w.sensorId = :sid order by w.timestamp desc", Wind.class)
                 .setParameter("sid", sensorId)
                 .setMaxResults(1);
         Wind wind = query.getSingleResult();
