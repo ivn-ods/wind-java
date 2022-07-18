@@ -10,7 +10,7 @@
     </parent>
     <groupId>ua.od.wind</groupId>
     <artifactId>wind-app</artifactId>
-    <version>v0.3</version>
+    <version>v0.2</version>
     <name>springsecurity</name>
     <description>Wind</description>
     <packaging>war</packaging>
