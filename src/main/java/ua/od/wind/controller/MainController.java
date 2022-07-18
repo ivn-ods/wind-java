@@ -5,8 +5,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ua.od.wind.ImageGenerators.ArrowSmall;
 import ua.od.wind.model.Sensor;
 import ua.od.wind.model.WindProcessed;
@@ -18,7 +21,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
 
 
 @PropertySource("classpath:application.properties")
@@ -38,30 +40,32 @@ public class MainController {
     }
 
     @GetMapping("/about")
-    public String about() {  return "about"; }
+    public String about() {
+        return "about";
+    }
 
     @GetMapping("/contact")
-    public String contact() {  return "contact"; }
-
-
+    public String contact() {
+        return "contact";
+    }
 
 
     @GetMapping("/")
-    @PostMapping("/")
-    public String index(Model model) {
+    public String index(@RequestParam(required = false) String message, Model model) {
         List<Sensor> enabledSensors = serviceLayer.getEnabledSensors();
 
         HashMap<Integer, List<WindProcessed>> windsMap = new HashMap<>();
         HashMap<Integer, Sensor> sensorsMap = new HashMap<>();
         HashMap<Integer, Boolean> sensorsIsAlive = new HashMap<>();
 
-        for (Sensor sensor: enabledSensors) {
-            sensorsIsAlive.put(sensor.getId(), serviceLayer.isSensorAlive(sensor, 1, 0 ));
+        for (Sensor sensor : enabledSensors) {
+            sensorsIsAlive.put(sensor.getId(), serviceLayer.isSensorAlive(sensor, 1, 0));
             //We need only one last datapoint to show in view
-            windsMap.put(sensor.getId(), serviceLayer.getProcessedWindData(sensor, 1, serviceLayer.getDataOffset() ));
+            windsMap.put(sensor.getId(), serviceLayer.getProcessedWindData(sensor, 1, serviceLayer.getDataOffset()));
             sensorsMap.put(sensor.getId(), sensor);
 
         }
+        model.addAttribute("message", message);
         model.addAttribute("showPayButton", userService.isUserLoggedInButNotPayed());
         model.addAttribute("showRegisterButton", userService.isGuest());
         model.addAttribute("winds", windsMap);
@@ -73,9 +77,9 @@ public class MainController {
 
     //test with this:
     //http://localhost:8080/save?p0=2790&p1=UI000000000000000&p2=124148177815252292104000
-    @GetMapping(value ="/save", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = "/save", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
-    public String saveWindData(@RequestParam(required = true) int p0, @RequestParam(required = true) String p1, @RequestParam(required = true) String p2) throws  IOException {
+    public String saveWindData(@RequestParam(required = true) int p0, @RequestParam(required = true) String p1, @RequestParam(required = true) String p2) throws IOException {
         return serviceLayer.storeWindDataAndGenerate4PNG(p0, p1, p2);
     }
 
@@ -91,7 +95,7 @@ public class MainController {
     @GetMapping(value = "/arrowsmall/{dir}", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     byte[] getArrowSmall(@PathVariable("dir") float dir) throws IOException {
-        return  ArrowSmall.makeImage(dir);
+        return ArrowSmall.makeImage(dir);
 
     }
 
@@ -99,28 +103,26 @@ public class MainController {
     public @ResponseBody
     byte[] getArrow(@PathVariable("id") int id, HttpServletRequest request) throws IOException {
         //TODO: make offset for users who not payed
-        String path ="";
+        String path = "";
         if (serviceLayer.getDataOffset() == 0) {
-             path = imgFolder + "/arrows_on_maps/map_" + id +".png";
+            path = imgFolder + "/arrows_on_maps/map_" + id + ".png";
+        } else {
+            path = imgFolder + "/arrows_on_maps/map_offset_" + id + ".png";
         }
-        else {
-             path = imgFolder + "/arrows_on_maps/map_offset_" + id +".png";
-        }
-        return  serviceLayer.getImagePNG(path);
+        return serviceLayer.getImagePNG(path);
 
     }
 
     @GetMapping(value = "/chart/{id}", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     byte[] getChart(@PathVariable("id") int id) throws IOException {
-        String path ="";
+        String path = "";
         if (serviceLayer.getDataOffset() == 0) {
-            path = imgFolder + "/charts/chart_" + id +".png";
+            path = imgFolder + "/charts/chart_" + id + ".png";
+        } else {
+            path = imgFolder + "/charts/chart_offset_" + id + ".png";
         }
-        else {
-            path = imgFolder + "/charts/chart_offset_" + id +".png";
-        }
-        return  serviceLayer.getImagePNG(path);
+        return serviceLayer.getImagePNG(path);
 
     }
 }

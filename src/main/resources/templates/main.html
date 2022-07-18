@@ -15,12 +15,17 @@
 <div class="center" style="margin-top:5px;  padding-left:20px">
     <p>You entered as: <b th:text="${username}"></b></p>
 </div>
+<div class="center" style="margin-top:5px;  padding-left:20px">
+    <p style="color: red" th:text="${message}"></p>
+</div>
 <th:block th:each="key : ${sensors.keySet()}">
 
     <div th:if="${sensorsIsAlive.get(key) == true}">
 
-        <div align="center" style="margin-top:10px; font-size:17px; height:100%"> Wind in <b th:text="${sensors.get(key).enName}"></b> at
-            <b th:text="${winds.get(key).get(0).getHourStr()}+':'+${winds.get(key).get(0).getMinuteStr()}"></b>
+        <div align="center" style="margin-top:10px; font-size:17px; height:100%"> Wind in <b
+                th:text="${sensors.get(key).enName}"></b>
+            <span th:text="${winds.get(key).get(0).day} + ' of ' + ${winds.get(key).get(0).monthStr}"></span> at
+            <b th:text="${winds.get(key).get(0).hourStr}+':'+${winds.get(key).get(0).minuteStr}"></b>
             <a th:href="@{'/table/'+ ${key}}">table</a></div>
 
 
@@ -46,28 +51,28 @@
                 </tr>
                 <tr>
                     <td class="s_font" style="height: 20px">Min</td>
-                    <td align="center" class="s_font" style="height: 20px" th:utext="${winds.get(key).get(0).min}"></td></tr>
+                    <td align="center" class="s_font" style="height: 20px" th:utext="${winds.get(key).get(0).min}"></td>
+                </tr>
                 <tr>
                     <td>t<span style="font-size:7pt; font-family: Arial, Helvetica, sans-serif">on the sun</span></td>
                     <td align="center" class="s_font" th:utext="${winds.get(key).get(0).temp}"> °С</td>
                 </tr>
                 <tr>
                     <td style="vertical-align:top" colspan="2">
-                    <img th:src="'../../arrow/' + ${key}" th:alt="${winds.get(key).get(0).dir}"/>
+                        <img th:src="'../../arrow/' + ${key}" th:alt="${winds.get(key).get(0).dir}"/>
                     </td>
                 </tr>
-                </tbody></table>
+                </tbody>
+            </table>
         </div>
     </div>
     <div th:if="${sensorsIsAlive.get(key) == false}">
-        <div align="center" style="margin-top:20px"> Anemometer in <b th:text="${sensors.get(key).enName}"></b> temporarily not working </div>
+        <div align="center" style="margin-top:20px"> Anemometer in <b th:text="${sensors.get(key).enName}"></b>
+            temporarily not working
+        </div>
     </div>
 
 </th:block>
-
-
-
-
 
 
 </body>

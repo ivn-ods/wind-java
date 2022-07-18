@@ -4,41 +4,46 @@
 <head th:replace="/layout :: head"></head>
 <body>
 <div th:replace="/layout :: buttons"></div>
-<div  class="center" style="margin-top:30px; padding-left:20px">
+<div class="center" style="margin-top:30px; padding-left:20px">
     <h3>Registration</h3>
     Subscription to the anemometer is paid, and costs 600 UAH per year.
     If you agree, please fill in all fields (English letters and numbers are allowed).
-    After clicking on the "Register" button, you will be redirected to the Privat LiqPay payment system, where from several payment methods you can
-    choose the most convenient one. After receiving confirmation from LiqPay, you will receive full access to the site for 1 year.
+    After clicking on the "Register" button, you will be redirected to the Privat LiqPay payment system, where from
+    several payment methods you can
+    choose the most convenient one. After receiving confirmation from LiqPay, you will receive full access to the site
+    for 1 year.
     You can use other payment methods, contact by phone, specified in the section
     <a href="../contact">Contact</a>
 </div>
-<div  align="center"  style="margin-top:20px">
-    <form  method="post" modelAttribute="userForm" action="/register" th:object="${userForm}">
-        <p style = "color:red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
-        <p style = "color:red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
-        <p style = "color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
-        <p style = "color:red" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></p>
+<div align="center" style="margin-top:20px">
+    <form method="post" modelAttribute="userForm" action="/register" th:object="${userForm}">
+        <p style="color:red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+        <p style="color:red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        <p style="color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        <p style="color:red" th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"></p>
 
         <p>
             <label for="username">Username:</label></br>
-            <input type="text" th:field="*{username}" id ="username">
+            <input type="text" th:field="*{username}" id="username">
 
         </p>
         <p>
             <label for="password">Password:</label></br>
-            <input type="password" id="password" name="password" class="form-control"  required>
+            <input type="password" id="password" name="password" class="form-control" required>
         </p>
         <p>
             <label for="password">Password again:</label></br>
-            <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control"  required>
+            <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" required>
         </p>
         <p>
             <label for="email">email:</label></br>
-            <input type="text" id="email" name="email" class="form-control"  required>
+            <input type="text" id="email" name="email" class="form-control" required>
         </p>
 
-        <button  type="submit" style="font-size: 16px; color:white;  background-image:url('img/btn.png'); height: 30px; width: 350px;">Register  and proceed to payment</button>
+        <button type="submit"
+                style="font-size: 16px; color:white;  background-image:url('img/btn.png'); height: 30px; width: 350px;">
+            Register and proceed to payment
+        </button>
     </form>
 </div>
 </body>

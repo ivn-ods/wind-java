@@ -1,7 +1,6 @@
 package ua.od.wind.model;
 
 
-
 import ua.od.wind.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

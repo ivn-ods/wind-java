@@ -7,16 +7,22 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ua.od.wind.dao.UserDAO;
 import ua.od.wind.model.User;
 import ua.od.wind.model.UserStatus;
+import ua.od.wind.security.SecurityUser;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -31,24 +37,40 @@ public class UserService {
     private final LiqPay liqpay;
     private final Environment env;
     private final JSONParser jsonParser = new JSONParser();
+    private final DaoAuthenticationProvider authProvider;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-   // private  final Logger logger = LogManager.getLogger(UserService.class.getName());
+    // private  final Logger logger = LogManager.getLogger(UserService.class.getName());
 
-
-    public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env) {
+    @Autowired
+    public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env, DaoAuthenticationProvider authProvider) {
         this.env = env;
+        this.authProvider = authProvider;
         this.liqpay = new LiqPay(this.env.getRequiredProperty("public_key"), this.env.getRequiredProperty("private_key"));
         this.userDAO = userDAO;
         this.passwordEncoder = passwordEncoder;
     }
 
+    public void doLogin() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.isAuthenticated()) {
+            User user = userDAO.getUserListByUsername(authentication.getName()).stream().findFirst().orElseThrow(() ->
+                    new UsernameNotFoundException("User doesn't exists"));
+            UserDetails userDetails = SecurityUser.fromUser(user);
+            UsernamePasswordAuthenticationToken authToken
+                    = new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), null, userDetails.getAuthorities());
+            SecurityContext sc = SecurityContextHolder.getContext();
+            sc.setAuthentication(authToken);
+        }
 
 
+    }
 
-    public String saveNewUser(User user){
+
+    public String saveNewUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        String date =new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         user.setRegisterDate(date);
         String paymentId = UUID.randomUUID().toString();
         user.setPaymentIdBase(paymentId);
@@ -58,11 +80,11 @@ public class UserService {
 
     }
 
-    public void saveUser(User user){
+    public void saveUser(User user) {
         userDAO.saveUser(user);
     }
 
-    public String getPaymentIdForThisYear(String  PaymentIdBase) {
+    public String getPaymentIdForThisYear(String PaymentIdBase) {
         return PaymentIdBase + "-" + new SimpleDateFormat("yyyy").format(new Date());
     }
 
@@ -72,11 +94,11 @@ public class UserService {
         params.put("action", "pay");
         params.put("amount", env.getRequiredProperty("payment_amount"));
         params.put("currency", "UAH");
-        params.put("description", "Subscribe for "+ user.getUsername() +
-                " for year "+
-                    new SimpleDateFormat("yyyy").format(new Date()) +
-                        "id=" +
-                        this.getPaymentIdForThisYear(user.getPaymentIdBase()));
+        params.put("description", "Subscribe for " + user.getUsername() +
+                " for year " +
+                new SimpleDateFormat("yyyy").format(new Date()) +
+                "id=" +
+                this.getPaymentIdForThisYear(user.getPaymentIdBase()));
         params.put("order_id", this.getPaymentIdForThisYear(user.getPaymentIdBase()));
         params.put("version", "3");
         params.put("sandbox", env.getRequiredProperty("sandbox"));
@@ -87,43 +109,48 @@ public class UserService {
     /**
      * Processing POST callback request from LiqPay and update user payDate and other data
      * see official LiqPay SDK
+     *
      * @param data
      * @param signature
      * @return
      * @throws ParseException
      * @throws java.text.ParseException
      */
-    public void processCallback(String data, String signature) throws ParseException, java.text.ParseException {
+    public String processCallback(String data, String signature) throws ParseException, java.text.ParseException {
         logger.warn("Data:" + data);
         logger.warn("Signature:" + signature);
-
+        String result;
         String keyDatakey = env.getRequiredProperty("private_key") + data + env.getRequiredProperty("private_key");
         String signatureCalculated = LiqPayUtil.base64_encode(LiqPayUtil.sha1(keyDatakey));
         String dataInJSON = new String(Base64.getDecoder().decode(data));
-        JSONObject dataInJSONObj = (JSONObject)jsonParser.parse(dataInJSON);
+        JSONObject dataInJSONObj = (JSONObject) jsonParser.parse(dataInJSON);
         HashMap<String, Object> dataInMap = LiqPayUtil.parseJson(dataInJSONObj);
-        User user = userDAO.findByPaymentId((String)dataInMap.get("order_id")).orElseThrow(() ->
+        User user = userDAO.findByPaymentId((String) dataInMap.get("order_id")).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
         if (!signature.equals(signatureCalculated)) {
-            logger.warn((String)dataInMap.get("order_id") + " Signatures not equal");
+            result = " Signatures not equal";
+            logger.warn((String) dataInMap.get("order_id") + result);
 
         }
-        if (!env.getRequiredProperty("public_key").equals((String)dataInMap.get("public_key"))) {
-            logger.warn((String)dataInMap.get("order_id") + " Keys not equal");
+        if (!env.getRequiredProperty("public_key").equals((String) dataInMap.get("public_key"))) {
+            result = " Keys not equal";
+            logger.warn((String) dataInMap.get("order_id") + result);
 
         }
-        if ( !((String)dataInMap.get("status")).equals("success")
-                && !((String)dataInMap.get("status")).equals("sandbox")) {
-            logger.warn((String)dataInMap.get("order_id") + " Status not success or sandbox");
+        if (!((String) dataInMap.get("status")).equals("success")
+                && !((String) dataInMap.get("status")).equals("sandbox")) {
+            result = " Status not success or sandbox";
+            logger.warn((String) dataInMap.get("order_id") + result);
 
         }
         user.setPayDate(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
-        user.setPhone( (String)dataInMap.get("sender_phone") );
-        user.setTransactionId( String.valueOf(dataInMap.get("transaction_id")) );
+        user.setPhone((String) dataInMap.get("sender_phone"));
+        user.setTransactionId(String.valueOf(dataInMap.get("transaction_id")));
         user.setUserStatus(UserStatus.PAYED);
         userDAO.saveUser(user);
-        logger.warn((String)dataInMap.get("order_id") + " payment confirmed");
-
+        result = " Payment confirmed";
+        logger.warn((String) dataInMap.get("order_id") + result);
+        return result;
     }
 
     public String getUserFromContext() {
@@ -132,8 +159,6 @@ public class UserService {
         if (name.equals("anonymousUser")) name = "Guest";
         return name;
     }
-
-
 
 
     public Optional<User> getOptionalUserByUsername(String username) {
@@ -146,7 +171,6 @@ public class UserService {
     public void checkUserStatus(Authentication authentication) {
 
 
-
         User user = userDAO.getUserByUsername(authentication.getName()).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
 //        User user = userDAO.findByPaymentId((String)dataInMap.get("order_id")).orElseThrow(() ->
@@ -157,9 +181,9 @@ public class UserService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             LocalDate payDate = LocalDate.parse(user.getPayDate(), formatter);
             LocalDate expiryDate = payDate.plusYears(1);
-            boolean expire =  !expiryDate.isAfter(LocalDate.now());
+            boolean expire = !expiryDate.isAfter(LocalDate.now());
 
-           //  Update user status in DB if today it was expired
+            //  Update user status in DB if today it was expired
             if (expire && user.getUserStatus() == UserStatus.PAYED) {
                 user.setUserStatus(UserStatus.NOTPAYED);
                 userDAO.mergeUser(user);

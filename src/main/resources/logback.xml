@@ -1,4 +1,4 @@
-<configuration debug="true" scan="true" scanPeriod="3 seconds">
+<configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
@@ -8,7 +8,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>callback.log</file>
+        <file>tmp/callback.log</file>
         <append>true</append>
         <encoder>
             <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -17,10 +17,10 @@
 
 
     <logger name="ua.od.wind.service.UserService" level="warn">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="FILE"/>
     </logger>
 
     <root level="info">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

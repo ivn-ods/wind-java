@@ -1,10 +1,6 @@
 package ua.od.wind.model;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
-public class WindProcessed{
+public class WindProcessed {
     private int id;
     private int sensorId;
 
@@ -15,12 +11,21 @@ public class WindProcessed{
     private String date;
     private String hourStr;
     private String minuteStr;
+    private String monthStr;
     private float min;
     private float mid;
     private float max;
     private float dir;
     private float v0;
     private float v1;
+
+    public String getMonthStr() {
+        return monthStr;
+    }
+
+    public void setMonthStr(String monthStr) {
+        this.monthStr = monthStr;
+    }
 
     public String getHourStr() {
         return hourStr;

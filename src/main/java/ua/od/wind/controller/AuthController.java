@@ -2,27 +2,26 @@ package ua.od.wind.controller;
 
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import java.util.logging.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ua.od.wind.model.User;
 import ua.od.wind.service.UserService;
 
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.logging.FileHandler;
 
 @Controller
 public class AuthController {
 
 
     private final UserService userService;
-   // private final Logger logger = Logger.getAnonymousLogger();;
+    // private final Logger logger = Logger.getAnonymousLogger();;
 
     @Autowired
     public AuthController(UserService userService) {
@@ -40,14 +39,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String doRegistration(@ModelAttribute("userForm")  @Valid User userForm,
+    public String doRegistration(@ModelAttribute("userForm") @Valid User userForm,
                                  BindingResult bindingResult) {
 
         if (userService.getOptionalUserByUsername(userForm.getUsername()).isPresent()) {
-            bindingResult.rejectValue("username",  "","This login already in use");
+            bindingResult.rejectValue("username", "", "This login already in use");
         }
 
-        if (!userForm.getPassword().equals(userForm.getPasswordConfirm())){
+        if (!userForm.getPassword().equals(userForm.getPasswordConfirm())) {
             bindingResult.rejectValue("passwordConfirm", "", "Passwords is different");
         }
 
@@ -60,25 +59,30 @@ public class AuthController {
     }
 
     @GetMapping("/pay")
-    public String pay( Principal principal,
-                       Model model) {
-         User readedUser = userService.getOptionalUserByUsername(principal.getName()).get();
-         //update only-this-year payment id
-         readedUser.setPaymentId(userService.getPaymentIdForThisYear(readedUser.getPaymentIdBase()));
-         userService.saveUser(readedUser);
+    public String pay(Principal principal,
+                      Model model) {
+        User readedUser = userService.getOptionalUserByUsername(principal.getName()).get();
+        //update only-this-year payment id
+        readedUser.setPaymentId(userService.getPaymentIdForThisYear(readedUser.getPaymentIdBase()));
+        userService.saveUser(readedUser);
 
-         String html =  userService.getPaymentButton(readedUser);
-         model.addAttribute("html", html);
-         model.addAttribute("message", "Registration was successfull, " + readedUser.getUsername());
+        String html = userService.getPaymentButton(readedUser);
+        model.addAttribute("html", html);
+        model.addAttribute("message", "Registration was successfull, " + readedUser.getUsername());
 
         return "pay";
     }
 
-    @PostMapping(value ="/callback", produces = MediaType.TEXT_PLAIN_VALUE)
-    public @ResponseBody void processPaymentCallback(@RequestParam(name = "data") String data, @RequestParam(name = "signature") String signature) throws ParseException, java.text.ParseException, IOException {
+    @PostMapping("/callback")
+    public String processPaymentCallback(@RequestParam(name = "data") String data, @RequestParam(name = "signature") String signature) throws ParseException, java.text.ParseException, IOException {
+        String message = userService.processCallback(data, signature);
+        return "redirect:/remember?message=" + message;
+    }
 
-         userService.processCallback(data, signature);
-
+    @GetMapping("/remember")
+    public String rememberUser(@RequestParam(required = true) String message) {
+        userService.doLogin();
+        return "redirect:/?message=" + message;
     }
 
 

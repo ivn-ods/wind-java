@@ -17,24 +17,24 @@ public class UserDAO {
     @PersistenceContext
     private EntityManager em;
 
-    public List<User> getUserListByUsername(String username){
-        TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.username = :name", User.class)
+    public List<User> getUserListByUsername(String username) {
+        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.username = :name", User.class)
                 .setParameter("name", username);
-        return  query.getResultList();
+        return query.getResultList();
 
     }
 
-    public Optional<User> findByPaymentId(String paymentId){
-        TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.paymentId = :paymentId", User.class)
+    public Optional<User> findByPaymentId(String paymentId) {
+        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.paymentId = :paymentId", User.class)
                 .setParameter("paymentId", paymentId);
-        return  Optional.of(query.getSingleResult());
+        return Optional.of(query.getSingleResult());
 
     }
 
-    public Optional<User> getUserByUsername(String username){
-        TypedQuery<User> query  = em.createQuery("SELECT u from User u where u.username = :name", User.class)
+    public Optional<User> getUserByUsername(String username) {
+        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.username = :name", User.class)
                 .setParameter("name", username);
-        return  Optional.of(query.getSingleResult());
+        return Optional.of(query.getSingleResult());
 
     }
 

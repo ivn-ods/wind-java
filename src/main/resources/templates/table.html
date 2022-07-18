@@ -7,18 +7,18 @@
 <p th:text="'Wind at spot: ' + ${sensor.enName}"></p>
 <table border="1" cellpadding="1">
     <tr>
-        <td> <b>Date/time</b> </td>
-        <td> <b>Max</b> </td>
-        <td> <b>Mid</b> </td>
-        <td> <b>Min</b> </td>
-        <td> <b>Dir</b> </td>
-        <td> <b>Temperature</b> </td>
+        <td><b>Date/time</b></td>
+        <td><b>Max</b></td>
+        <td><b>Mid</b></td>
+        <td><b>Min</b></td>
+        <td><b>Dir</b></td>
+        <td><b>Temperature</b></td>
 
     </tr>
 
 
     <tr th:each="wind : ${winds}">
-        <td th:text="${wind.getDate()} + ' ' + ${wind.getHour()} + ':' + ${wind.getMinute() }"></td>
+        <td th:text="${wind.getDate()} + ' ' + ${wind.getHourStr()} + ':' + ${wind.getMinuteStr() }"></td>
         <td th:text="${wind.max}"></td>
         <td th:text="${wind.mid}"></td>
         <td th:text="${wind.min}"></td>

@@ -1,12 +1,12 @@
 package ua.od.wind.ImageGenerators;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public  class ArrowSmall {
+public class ArrowSmall {
 
     public static byte[] makeImage(float dir) throws IOException {
 

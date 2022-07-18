@@ -22,7 +22,6 @@ public class Wind {
     private int v1;
 
 
-
     public void setId(int id) {
         this.id = id;
     }

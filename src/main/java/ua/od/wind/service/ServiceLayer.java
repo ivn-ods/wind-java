@@ -3,9 +3,6 @@ package ua.od.wind.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ua.od.wind.ImageGenerators.Arrow;
 import ua.od.wind.ImageGenerators.Chart;
@@ -26,8 +23,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @PropertySource("classpath:application.properties")
@@ -92,45 +91,44 @@ public class ServiceLayer {
                 wind.setSensorId(sensor.getId());
                 windDAO.saveWind(wind);
                 // remove old data not to flood database
-              //  windDAO.removeWind(sensor.getId());
+                //  windDAO.removeWind(sensor.getId());
 
                 this.generateCharts(sensor);
                 this.generateArrows(sensor);
 
                 return "inserted ok";
-            }
-            else {
+            } else {
                 return "sensor null";
             }
-        }
-        else {
+        } else {
             return "not inserted, wrong hash";
         }
 
 
     }
+
     public void generateCharts(Sensor sensor) throws IOException {
 
-        List<WindProcessed> windsProcessed =  this.getProcessedWindData(sensor, dataLimit, 0);
-        String path = imgFolder + "/charts/chart_" + sensor.getId()  +".png";
-        chart.generate(windsProcessed,  path);
+        List<WindProcessed> windsProcessed = this.getProcessedWindData(sensor, dataLimit, 0);
+        String path = imgFolder + "/charts/chart_" + sensor.getId() + ".png";
+        chart.generate(windsProcessed, path);
 
         windsProcessed = this.getProcessedWindData(sensor, dataLimit, dataOffset);
-        path = imgFolder + "/charts/chart_offset_" + sensor.getId()  +".png";
-        chart.generate(windsProcessed,  path);
+        path = imgFolder + "/charts/chart_offset_" + sensor.getId() + ".png";
+        chart.generate(windsProcessed, path);
 
     }
 
     public void generateArrows(Sensor sensor) throws IOException {
 
-        List<WindProcessed> windsProcessed =  this.getProcessedWindData(sensor, 1, 0);
-        String path = imgFolder + "/arrows_on_maps/map_" + sensor.getId()  +".png";
+        List<WindProcessed> windsProcessed = this.getProcessedWindData(sensor, 1, 0);
+        String path = imgFolder + "/arrows_on_maps/map_" + sensor.getId() + ".png";
 
-        arrow.generate(windsProcessed,  path, imgFolder);
+        arrow.generate(windsProcessed, path, imgFolder);
 
         windsProcessed = this.getProcessedWindData(sensor, 1, dataOffset);
-        path = imgFolder + "/arrows_on_maps/map_offset_" + sensor.getId()  +".png";
-        arrow.generate(windsProcessed,  path, imgFolder);
+        path = imgFolder + "/arrows_on_maps/map_offset_" + sensor.getId() + ".png";
+        arrow.generate(windsProcessed, path, imgFolder);
 
     }
 
@@ -143,7 +141,7 @@ public class ServiceLayer {
 
     private LocalDateTime getLDT(int timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp);
-        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return LocalDateTime.ofInstant(instant, ZoneId.of("Europe/Paris"));
     }
 
     public Sensor getSensorById(int id) {
@@ -159,30 +157,30 @@ public class ServiceLayer {
     }
 
     public byte[] getImagePNG(String path) throws IOException {
-            File file = new File(path);
-            BufferedImage image = ImageIO.read(file);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", baos);
-            return baos.toByteArray();
+        File file = new File(path);
+        BufferedImage image = ImageIO.read(file);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
 
     }
 
 
-    public List<WindProcessed> getProcessedWindData(Sensor sensor, int dataLimit, int  dataOffset) {
+    public List<WindProcessed> getProcessedWindData(Sensor sensor, int dataLimit, int dataOffset) {
 
         List<Wind> windRaw = windDAO.getRawWindData(sensor.getId(), dataLimit, dataOffset);
 
         ArrayList<WindProcessed> windsProcessed = new ArrayList<>();
-        for(Wind wind : windRaw) {
+        for (Wind wind : windRaw) {
             WindProcessed windProcessed = new WindProcessed();
             windProcessed.setId(wind.getId());
             windProcessed.setSensorId(wind.getSensorId());
-            windProcessed.setTemp(wind.getTemp()-100);
+            windProcessed.setTemp(wind.getTemp() - 100);
             float sf = sensor.getSpeedFactor();
             int max = wind.getMax();
-            windProcessed.setMin( ((float)(wind.getMin() / sensor.getSpeedFactor()))/10 );
-            windProcessed.setMid( ((float)(wind.getMid() / sensor.getSpeedFactor()))/10 );
-            windProcessed.setMax( ((float)(wind.getMax() / sensor.getSpeedFactor()))/10 );
+            windProcessed.setMin(((float) (wind.getMin() / sensor.getSpeedFactor())) / 10);
+            windProcessed.setMid(((float) (wind.getMid() / sensor.getSpeedFactor())) / 10);
+            windProcessed.setMax(((float) (wind.getMax() / sensor.getSpeedFactor())) / 10);
             windProcessed.setDay(this.getLDT(wind.getTimestamp()).getDayOfMonth());
 
             int hour = this.getLDT(wind.getTimestamp()).getHour();
@@ -197,13 +195,16 @@ public class ServiceLayer {
             float dirProcesed;
             int dir = wind.getDir();
             if (dir > 500) {
-                 dirProcesed = 16 - (int)((999 - dir) / 4.5) / 10;
+                dirProcesed = 16 - (int) ((999 - dir) / 4.5) / 10;
             } else {
-                 dirProcesed = (int)(dir / 4.5) / 10;
+                dirProcesed = (int) (dir / 4.5) / 10;
             }
+            String monthsStr = this.getLDT(wind.getTimestamp()).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+            windProcessed.setMonthStr(monthsStr);
+
             windProcessed.setDir((float) ((dirProcesed + sensor.getDirFactor()) * 0.75));
-            windProcessed.setV0(wind.getV0()/10);
-            windProcessed.setV1(wind.getV1()/10);
+            windProcessed.setV0(wind.getV0() / 10);
+            windProcessed.setV1(wind.getV1() / 10);
             windsProcessed.add(windProcessed);
         }
         return windsProcessed;
@@ -211,13 +212,13 @@ public class ServiceLayer {
     }
 
 
-
     public int getDataOffset() {
-        if (userService.isUserPayed()) return 0; else return this.dataOffset;
+        if (userService.isUserPayed()) return 0;
+        else return this.dataOffset;
     }
 
     //If sensor not send data for a long time we not show data from them
-    public boolean isSensorAlive(Sensor sensor, int dataLimit, int  dataOffset) {
+    public boolean isSensorAlive(Sensor sensor, int dataLimit, int dataOffset) {
         List<Wind> windRaw = windDAO.getRawWindData(sensor.getId(), dataLimit, dataOffset);
         int timeDelay = (int) ZonedDateTime.now().toEpochSecond() - windRaw.get(0).getTimestamp();
         return timeDelay < 3600 * 3;

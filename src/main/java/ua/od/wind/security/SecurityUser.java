@@ -68,9 +68,11 @@ public class SecurityUser implements UserDetails {
                 true,
                 true,
                 (user.getUserStatus() == UserStatus.PAYED) ?
-                        Collections.singletonList( new SimpleGrantedAuthority("PAYED")) :
-                        Collections.singletonList( new SimpleGrantedAuthority("NOTPAYED"))
+                        Collections.singletonList(new SimpleGrantedAuthority("PAYED")) :
+                        Collections.singletonList(new SimpleGrantedAuthority("NOTPAYED"))
 
         );
-    };
+    }
+
+    ;
 }
