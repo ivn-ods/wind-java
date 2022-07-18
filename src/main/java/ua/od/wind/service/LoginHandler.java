@@ -1,7 +1,5 @@
 package ua.od.wind.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -11,16 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
 public class LoginHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     @Autowired
     private UserService userService;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public LoginHandler(String target) {
-        // super(target);
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {

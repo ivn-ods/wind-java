@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+
 public class Chart {
 
     // Utility class to calculate maximum values in list of datasets

@@ -1,5 +1,6 @@
 package ua.od.wind.model;
 
+// Class represent processed (not raw) wind data
 public class WindProcessed {
     private int id;
     private int sensorId;
@@ -98,7 +99,6 @@ public class WindProcessed {
     public void setTemp(int temp) {
         this.temp = temp;
     }
-
 
     public void setMin(float min) {
         this.min = min;

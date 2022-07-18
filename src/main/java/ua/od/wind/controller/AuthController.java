@@ -21,7 +21,6 @@ public class AuthController {
 
 
     private final UserService userService;
-    // private final Logger logger = Logger.getAnonymousLogger();;
 
     @Autowired
     public AuthController(UserService userService) {

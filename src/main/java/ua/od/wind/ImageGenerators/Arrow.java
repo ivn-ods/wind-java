@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@Component
 public class Arrow {
 
     public static void generate(List<WindProcessed> windsProcessed, String path, String imgFolder) throws IOException {

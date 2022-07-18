@@ -15,7 +15,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import ua.od.wind.service.LiqPayPayment;
+//import ua.od.wind.service.LiqPayPayment;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -29,42 +29,12 @@ import java.util.Properties;
 //@EnableWebMvc
 public class SpringConfig implements WebMvcConfigurer {
 
-    private final ApplicationContext applicationContext;
-
     private final Environment env;
 
     @Autowired
-    public SpringConfig(ApplicationContext applicationContext, Environment env) {
-        this.applicationContext = applicationContext;
+    public SpringConfig(Environment env) {
         this.env = env;
     }
-
-//    @Bean
-//    public SpringResourceTemplateResolver templateResolver() {
-//        SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
-//        templateResolver.setApplicationContext(applicationContext);
-//        //templateResolver.setPrefix("/resources/templates/");
-//        templateResolver.setSuffix(".html");
-//        templateResolver.setCharacterEncoding("UTF-8");
-//        return templateResolver;
-//    }
-//
-//    @Bean
-//    public SpringTemplateEngine templateEngine() {
-//        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-//        templateEngine.setTemplateResolver(templateResolver());
-//        templateEngine.setEnableSpringELCompiler(true);
-//        return templateEngine;
-//    }
-
-//    @Override
-//    public void configureViewResolvers(ViewResolverRegistry registry) {
-//        ThymeleafViewResolver resolver = new ThymeleafViewResolver();
-//        resolver.setTemplateEngine(templateEngine());
-//        resolver.setCharacterEncoding("UTF-8");
-//
-//        registry.viewResolver(resolver);
-//    }
 
     @Bean
     public DataSource dataSource() {
@@ -78,12 +48,6 @@ public class SpringConfig implements WebMvcConfigurer {
         return dataSource;
     }
 
-
-    // Используем Hibernate вместо JdbcTemplate
-//    @Bean
-//    public JdbcTemplate jdbcTemplate() {
-//        return new JdbcTemplate(dataSource());
-//    }
 
     private Properties hibernateProperties() {
         Properties properties = new Properties();
@@ -107,34 +71,16 @@ public class SpringConfig implements WebMvcConfigurer {
         return em;
     }
 
-    @Bean
-    public LiqPayPayment paymentGenerator() {
-        return new LiqPayPayment(env);
-    }
-
-//    @Bean
-//    public LocalSessionFactoryBean sessionFactory() {
-//        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-//        sessionFactory.setDataSource(dataSource());
-//        sessionFactory.setPackagesToScan("ua.od.wind.models");
-//        sessionFactory.setHibernateProperties(hibernateProperties());
-//
-//        return sessionFactory;
-//    }
-
-//    @Bean
-//    public PlatformTransactionManager hibernateTransactionManager() {
-//        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-//        transactionManager.setSessionFactory(sessionFactory().getObject());
-//
-//        return transactionManager;
-//    }
+ //   @Bean
+ //   public LiqPayPayment paymentGenerator() {
+//        return new LiqPayPayment(env);
+ //   }
 
 
     @Bean
     public ByteArrayHttpMessageConverter byteArrayHttpMessageConverter() {
         ByteArrayHttpMessageConverter byteArrayConverter = new ByteArrayHttpMessageConverter();
-        byteArrayConverter.setSupportedMediaTypes(new ArrayList<MediaType>(Arrays.asList(MediaType.IMAGE_PNG)));
+        byteArrayConverter.setSupportedMediaTypes(new ArrayList<>(Arrays.asList(MediaType.IMAGE_PNG)));
         return byteArrayConverter;
     }
 

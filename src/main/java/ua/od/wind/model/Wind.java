@@ -2,6 +2,7 @@ package ua.od.wind.model;
 
 import javax.persistence.*;
 
+// Class represent RAW wind data
 @Entity(name = "windTable")
 @Table(name = "wind")
 public class Wind {
@@ -25,7 +26,6 @@ public class Wind {
     public void setId(int id) {
         this.id = id;
     }
-
 
     public int getId() {
         return id;

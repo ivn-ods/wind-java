@@ -31,21 +31,17 @@ import java.util.*;
 
 @Service
 public class UserService {
-    //private final UserRepository userRepository;
     private final UserDAO userDAO;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LiqPay liqpay;
     private final Environment env;
     private final JSONParser jsonParser = new JSONParser();
-    private final DaoAuthenticationProvider authProvider;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    // private  final Logger logger = LogManager.getLogger(UserService.class.getName());
 
     @Autowired
-    public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env, DaoAuthenticationProvider authProvider) {
+    public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env) {
         this.env = env;
-        this.authProvider = authProvider;
         this.liqpay = new LiqPay(this.env.getRequiredProperty("public_key"), this.env.getRequiredProperty("private_key"));
         this.userDAO = userDAO;
         this.passwordEncoder = passwordEncoder;
@@ -109,12 +105,6 @@ public class UserService {
     /**
      * Processing POST callback request from LiqPay and update user payDate and other data
      * see official LiqPay SDK
-     *
-     * @param data
-     * @param signature
-     * @return
-     * @throws ParseException
-     * @throws java.text.ParseException
      */
     public String processCallback(String data, String signature) throws ParseException, java.text.ParseException {
         logger.warn("Data:" + data);
@@ -166,16 +156,12 @@ public class UserService {
 
     }
 
-    // Check if account not expired every login.
+    // Check every login if account not expired .
     // Ovaerwise set user NOTPAYED
     public void checkUserStatus(Authentication authentication) {
 
-
         User user = userDAO.getUserByUsername(authentication.getName()).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
-//        User user = userDAO.findByPaymentId((String)dataInMap.get("order_id")).orElseThrow(() ->
-//                new UsernameNotFoundException("User doesn't exists"));
-
 
         if (user.getPayDate() != null && !user.getPayDate().equals("")) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -214,6 +200,5 @@ public class UserService {
                 (authentication instanceof AnonymousAuthenticationToken);
 
     }
-
 
 }

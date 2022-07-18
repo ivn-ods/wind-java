@@ -24,15 +24,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final DataSource dataSource;
-    private final LoginHandler loginHandler;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder, DataSource dataSource) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, BCryptPasswordEncoder passwordEncoder) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.passwordEncoder = passwordEncoder;
-        this.dataSource = dataSource;
-        this.loginHandler = new LoginHandler("/");
     }
 
     @Override
@@ -93,7 +89,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public LoginHandler loginHandler() {
-        return new LoginHandler("/");
+        return new LoginHandler();
     }
 
 

@@ -12,8 +12,6 @@ import ua.od.wind.model.Wind;
 import ua.od.wind.model.WindProcessed;
 
 import javax.imageio.ImageIO;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -31,25 +29,17 @@ import java.util.Objects;
 
 @PropertySource("classpath:application.properties")
 @Service
-public class ServiceLayer {
+public class DataService {
     private final WindDAO windDAO;
-    private final Chart chart;
-    private final Arrow arrow;
     private final int dataLimit;
     private final int dataOffset;
     private final String imgFolder;
     private final UserService userService;
 
-    @PersistenceContext
-    private EntityManager em;
-
-
     @Autowired
-    public ServiceLayer(WindDAO windDAO, Chart chart, Arrow arrow, Environment env,
-                        UserService userService) {
+    public DataService(WindDAO windDAO, Environment env,
+                       UserService userService) {
         this.windDAO = windDAO;
-        this.chart = chart;
-        this.arrow = arrow;
         this.dataLimit = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_limit")));
         this.dataOffset = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_offset")));
         this.imgFolder = Objects.requireNonNull(env.getProperty("img_generated_folder"));
@@ -67,17 +57,16 @@ public class ServiceLayer {
         int v1 = Integer.parseInt(status.substring(15, 18));
         int temp = Integer.parseInt(status.substring(18, 21));
         int res = Integer.parseInt(status.substring(21, 24));
+        int hashCalculated = 0;
 
-        int hash_calc = 0;
         for (int i = 0; i < imei.length(); i++) {
             int symbol = imei.getBytes(StandardCharsets.UTF_8)[i];
-            hash_calc += symbol;
+            hashCalculated += symbol;
         }
-        hash_calc += min + mid + max + dir + v0 + v1 + temp + res;
+        hashCalculated += min + mid + max + dir + v0 + v1 + temp + res;
 
         Sensor sensor = windDAO.getSensorByImei(imei);
-//TODO: add hashcalc check
-        if (true) {
+        if (hashCalculated == hash) {
             if (sensor != null) {
                 Wind wind = new Wind();
                 wind.setTimestamp((int) ZonedDateTime.now().toEpochSecond());
@@ -91,7 +80,7 @@ public class ServiceLayer {
                 wind.setSensorId(sensor.getId());
                 windDAO.saveWind(wind);
                 // remove old data not to flood database
-                //  windDAO.removeWind(sensor.getId());
+                windDAO.removeWind(sensor.getId());
 
                 this.generateCharts(sensor);
                 this.generateArrows(sensor);
@@ -111,11 +100,11 @@ public class ServiceLayer {
 
         List<WindProcessed> windsProcessed = this.getProcessedWindData(sensor, dataLimit, 0);
         String path = imgFolder + "/charts/chart_" + sensor.getId() + ".png";
-        chart.generate(windsProcessed, path);
+        Chart.generate(windsProcessed, path);
 
         windsProcessed = this.getProcessedWindData(sensor, dataLimit, dataOffset);
         path = imgFolder + "/charts/chart_offset_" + sensor.getId() + ".png";
-        chart.generate(windsProcessed, path);
+        Chart.generate(windsProcessed, path);
 
     }
 
@@ -123,12 +112,11 @@ public class ServiceLayer {
 
         List<WindProcessed> windsProcessed = this.getProcessedWindData(sensor, 1, 0);
         String path = imgFolder + "/arrows_on_maps/map_" + sensor.getId() + ".png";
-
-        arrow.generate(windsProcessed, path, imgFolder);
+        Arrow.generate(windsProcessed, path, imgFolder);
 
         windsProcessed = this.getProcessedWindData(sensor, 1, dataOffset);
         path = imgFolder + "/arrows_on_maps/map_offset_" + sensor.getId() + ".png";
-        arrow.generate(windsProcessed, path, imgFolder);
+        Arrow.generate(windsProcessed, path, imgFolder);
 
     }
 
@@ -146,10 +134,6 @@ public class ServiceLayer {
 
     public Sensor getSensorById(int id) {
         return windDAO.getSensorById(id);
-    }
-
-    public Sensor getSensorByImei(String imei) {
-        return windDAO.getSensorByImei(imei);
     }
 
     public List<Sensor> getEnabledSensors() {
