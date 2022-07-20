@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import ua.od.wind.dao.UserDAO;
+import ua.od.wind.dao.UserDAOimpl;
 import ua.od.wind.model.User;
 import ua.od.wind.model.UserStatus;
 import ua.od.wind.security.SecurityUser;
@@ -31,7 +30,7 @@ import java.util.*;
 
 @Service
 public class UserService {
-    private final UserDAO userDAO;
+    private final UserDAOimpl userDAOimpl;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LiqPay liqpay;
     private final Environment env;
@@ -40,10 +39,10 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    public UserService(UserDAO userDAO, BCryptPasswordEncoder passwordEncoder, Environment env) {
+    public UserService(UserDAOimpl userDAOimpl, BCryptPasswordEncoder passwordEncoder, Environment env) {
         this.env = env;
         this.liqpay = new LiqPay(this.env.getRequiredProperty("public_key"), this.env.getRequiredProperty("private_key"));
-        this.userDAO = userDAO;
+        this.userDAOimpl = userDAOimpl;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -51,7 +50,7 @@ public class UserService {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated()) {
-            User user = userDAO.getUserListByUsername(authentication.getName()).stream().findFirst().orElseThrow(() ->
+            User user = userDAOimpl.getUserListByUsername(authentication.getName()).stream().findFirst().orElseThrow(() ->
                     new UsernameNotFoundException("User doesn't exists"));
             UserDetails userDetails = SecurityUser.fromUser(user);
             UsernamePasswordAuthenticationToken authToken
@@ -71,13 +70,13 @@ public class UserService {
         String paymentId = UUID.randomUUID().toString();
         user.setPaymentIdBase(paymentId);
         user.setUserStatus(UserStatus.NOTPAYED);
-        userDAO.saveUser(user);
+        userDAOimpl.saveUser(user);
         return paymentId;
 
     }
 
     public void saveUser(User user) {
-        userDAO.saveUser(user);
+        userDAOimpl.saveUser(user);
     }
 
     public String getPaymentIdForThisYear(String PaymentIdBase) {
@@ -115,7 +114,7 @@ public class UserService {
         String dataInJSON = new String(Base64.getDecoder().decode(data));
         JSONObject dataInJSONObj = (JSONObject) jsonParser.parse(dataInJSON);
         HashMap<String, Object> dataInMap = LiqPayUtil.parseJson(dataInJSONObj);
-        User user = userDAO.findByPaymentId((String) dataInMap.get("order_id")).orElseThrow(() ->
+        User user = userDAOimpl.findByPaymentId((String) dataInMap.get("order_id")).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
         if (!signature.equals(signatureCalculated)) {
             result = " Signatures not equal";
@@ -137,7 +136,7 @@ public class UserService {
         user.setPhone((String) dataInMap.get("sender_phone"));
         user.setTransactionId(String.valueOf(dataInMap.get("transaction_id")));
         user.setUserStatus(UserStatus.PAYED);
-        userDAO.saveUser(user);
+        userDAOimpl.saveUser(user);
         result = " Payment confirmed";
         logger.warn((String) dataInMap.get("order_id") + result);
         return result;
@@ -152,7 +151,7 @@ public class UserService {
 
 
     public Optional<User> getOptionalUserByUsername(String username) {
-        return userDAO.getUserListByUsername(username).stream().findFirst();
+        return userDAOimpl.getUserListByUsername(username).stream().findFirst();
 
     }
 
@@ -160,7 +159,7 @@ public class UserService {
     // Ovaerwise set user NOTPAYED
     public void checkUserStatus(Authentication authentication) {
 
-        User user = userDAO.getUserByUsername(authentication.getName()).orElseThrow(() ->
+        User user = userDAOimpl.getUserByUsername(authentication.getName()).orElseThrow(() ->
                 new UsernameNotFoundException("User doesn't exists"));
 
         if (user.getPayDate() != null && !user.getPayDate().equals("")) {
@@ -172,7 +171,7 @@ public class UserService {
             //  Update user status in DB if today it was expired
             if (expire && user.getUserStatus() == UserStatus.PAYED) {
                 user.setUserStatus(UserStatus.NOTPAYED);
-                userDAO.mergeUser(user);
+                userDAOimpl.mergeUser(user);
             }
         }
     }

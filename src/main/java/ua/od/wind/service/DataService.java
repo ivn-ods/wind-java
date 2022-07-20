@@ -6,7 +6,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import ua.od.wind.ImageGenerators.Arrow;
 import ua.od.wind.ImageGenerators.Chart;
-import ua.od.wind.dao.WindDAO;
+import ua.od.wind.dao.WindDAOimpl;
 import ua.od.wind.model.Sensor;
 import ua.od.wind.model.Wind;
 import ua.od.wind.model.WindProcessed;
@@ -30,16 +30,16 @@ import java.util.Objects;
 @PropertySource("classpath:application.properties")
 @Service
 public class DataService {
-    private final WindDAO windDAO;
+    private final WindDAOimpl windDAOimpl;
     private final int dataLimit;
     private final int dataOffset;
     private final String imgFolder;
     private final UserService userService;
 
     @Autowired
-    public DataService(WindDAO windDAO, Environment env,
+    public DataService(WindDAOimpl windDAOimpl, Environment env,
                        UserService userService) {
-        this.windDAO = windDAO;
+        this.windDAOimpl = windDAOimpl;
         this.dataLimit = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_limit")));
         this.dataOffset = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_offset")));
         this.imgFolder = Objects.requireNonNull(env.getProperty("img_generated_folder"));
@@ -65,7 +65,7 @@ public class DataService {
         }
         hashCalculated += min + mid + max + dir + v0 + v1 + temp + res;
 
-        Sensor sensor = windDAO.getSensorByImei(imei);
+        Sensor sensor = windDAOimpl.getSensorByImei(imei);
         if (hashCalculated == hash) {
             if (sensor != null) {
                 Wind wind = new Wind();
@@ -78,9 +78,9 @@ public class DataService {
                 wind.setV0(v0);
                 wind.setV1(v1);
                 wind.setSensorId(sensor.getId());
-                windDAO.saveWind(wind);
+                windDAOimpl.saveWind(wind);
                 // remove old data not to flood database
-                windDAO.removeWind(sensor.getId());
+                windDAOimpl.removeWind(sensor.getId());
 
                 this.generateCharts(sensor);
                 this.generateArrows(sensor);
@@ -133,11 +133,11 @@ public class DataService {
     }
 
     public Sensor getSensorById(int id) {
-        return windDAO.getSensorById(id);
+        return windDAOimpl.getSensorById(id);
     }
 
     public List<Sensor> getEnabledSensors() {
-        return windDAO.getEnabledSensors();
+        return windDAOimpl.getEnabledSensors();
     }
 
     public byte[] getImagePNG(String path) throws IOException {
@@ -152,7 +152,7 @@ public class DataService {
 
     public List<WindProcessed> getProcessedWindData(Sensor sensor, int dataLimit, int dataOffset) {
 
-        List<Wind> windRaw = windDAO.getRawWindData(sensor.getId(), dataLimit, dataOffset);
+        List<Wind> windRaw = windDAOimpl.getRawWindData(sensor.getId(), dataLimit, dataOffset);
 
         ArrayList<WindProcessed> windsProcessed = new ArrayList<>();
         for (Wind wind : windRaw) {
@@ -203,7 +203,7 @@ public class DataService {
 
     //If sensor not send data for a long time we not show data from them
     public boolean isSensorAlive(Sensor sensor, int dataLimit, int dataOffset) {
-        List<Wind> windRaw = windDAO.getRawWindData(sensor.getId(), dataLimit, dataOffset);
+        List<Wind> windRaw = windDAOimpl.getRawWindData(sensor.getId(), dataLimit, dataOffset);
         int timeDelay = (int) ZonedDateTime.now().toEpochSecond() - windRaw.get(0).getTimestamp();
         return timeDelay < 3600 * 3;
     }

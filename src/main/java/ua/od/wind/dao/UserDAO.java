@@ -1,52 +1,18 @@
 package ua.od.wind.dao;
-
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ua.od.wind.model.User;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
+public interface UserDAO {
 
-@Repository
-public class UserDAO {
+     List<User> getUserListByUsername(String username);
 
-    @PersistenceContext
-    private EntityManager em;
+     Optional<User> findByPaymentId(String paymentId);
 
-    public List<User> getUserListByUsername(String username) {
-        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.username = :name", User.class)
-                .setParameter("name", username);
-        return query.getResultList();
+     Optional<User> getUserByUsername(String username);
 
-    }
+     void saveUser(User user);
 
-    public Optional<User> findByPaymentId(String paymentId) {
-        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.paymentId = :paymentId", User.class)
-                .setParameter("paymentId", paymentId);
-        return Optional.of(query.getSingleResult());
-
-    }
-
-    public Optional<User> getUserByUsername(String username) {
-        TypedQuery<User> query = em.createQuery("SELECT u from User u where u.username = :name", User.class)
-                .setParameter("name", username);
-        return Optional.of(query.getSingleResult());
-
-    }
-
-    @Transactional
-    public void saveUser(User user) {
-        em.persist(user);
-    }
-
-    @Transactional
-    public void mergeUser(User user) {
-        em.merge(user);
-    }
-
+     void mergeUser(User user);
 
 }
