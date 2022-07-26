@@ -18,9 +18,10 @@ public class Wind {
     private int max;
     private int temp;
     private int dir;
-    private int timestamp;
+    private long timestamp;
     private int v0;
     private int v1;
+
 
 
     public void setId(int id) {
@@ -72,18 +73,18 @@ public class Wind {
     }
 
     public int getDir() {
-        return dir / 100;
+        return dir;
     }
 
     public void setDir(int dir) {
         this.dir = dir;
     }
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(int timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 

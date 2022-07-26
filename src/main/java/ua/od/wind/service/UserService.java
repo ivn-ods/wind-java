@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import ua.od.wind.dao.UserDAO;
 import ua.od.wind.dao.UserDAOimpl;
 import ua.od.wind.model.User;
 import ua.od.wind.model.UserStatus;
@@ -30,7 +31,7 @@ import java.util.*;
 
 @Service
 public class UserService {
-    private final UserDAOimpl userDAOimpl;
+    private final UserDAO userDAOimpl;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LiqPay liqpay;
     private final Environment env;
@@ -39,7 +40,7 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
-    public UserService(UserDAOimpl userDAOimpl, BCryptPasswordEncoder passwordEncoder, Environment env) {
+    public UserService(UserDAO userDAOimpl, BCryptPasswordEncoder passwordEncoder, Environment env) {
         this.env = env;
         this.liqpay = new LiqPay(this.env.getRequiredProperty("public_key"), this.env.getRequiredProperty("private_key"));
         this.userDAOimpl = userDAOimpl;

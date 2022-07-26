@@ -6,6 +6,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import ua.od.wind.ImageGenerators.Arrow;
 import ua.od.wind.ImageGenerators.Chart;
+import ua.od.wind.dao.WindDAO;
 import ua.od.wind.dao.WindDAOimpl;
 import ua.od.wind.model.Sensor;
 import ua.od.wind.model.Wind;
@@ -30,14 +31,16 @@ import java.util.Objects;
 @PropertySource("classpath:application.properties")
 @Service
 public class DataService {
-    private final WindDAOimpl windDAOimpl;
+    private final WindDAO windDAOimpl;
     private final int dataLimit;
     private final int dataOffset;
     private final String imgFolder;
     private final UserService userService;
+    //private final Environment env;
 
     @Autowired
-    public DataService(WindDAOimpl windDAOimpl, Environment env,
+    public DataService(WindDAO windDAOimpl,
+                       Environment env,
                        UserService userService) {
         this.windDAOimpl = windDAOimpl;
         this.dataLimit = Integer.parseInt(Objects.requireNonNull(env.getProperty("data_limit")));
@@ -120,14 +123,14 @@ public class DataService {
 
     }
 
-    public String getDate(int timestamp) {
+    public String getDate(long timestamp) {
         LocalDateTime ldt = this.getLDT(timestamp);
         return ldt.getDayOfMonth() + "-" +
                 ldt.getMonthValue() + "-" +
                 ldt.getYear();
     }
 
-    private LocalDateTime getLDT(int timestamp) {
+    private LocalDateTime getLDT(long timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp);
         return LocalDateTime.ofInstant(instant, ZoneId.of("Europe/Paris"));
     }
@@ -160,8 +163,6 @@ public class DataService {
             windProcessed.setId(wind.getId());
             windProcessed.setSensorId(wind.getSensorId());
             windProcessed.setTemp(wind.getTemp() - 100);
-            float sf = sensor.getSpeedFactor();
-            int max = wind.getMax();
             windProcessed.setMin(((float) (wind.getMin() / sensor.getSpeedFactor())) / 10);
             windProcessed.setMid(((float) (wind.getMid() / sensor.getSpeedFactor())) / 10);
             windProcessed.setMax(((float) (wind.getMax() / sensor.getSpeedFactor())) / 10);
@@ -204,7 +205,7 @@ public class DataService {
     //If sensor not send data for a long time we not show data from them
     public boolean isSensorAlive(Sensor sensor, int dataLimit, int dataOffset) {
         List<Wind> windRaw = windDAOimpl.getRawWindData(sensor.getId(), dataLimit, dataOffset);
-        int timeDelay = (int) ZonedDateTime.now().toEpochSecond() - windRaw.get(0).getTimestamp();
+        long timeDelay =  ZonedDateTime.now().toEpochSecond() - windRaw.get(0).getTimestamp();
         return timeDelay < 3600 * 3;
     }
 }
