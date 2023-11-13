@@ -1,1 +1,1 @@
-# wind.od.ua  Backend side of custom mate wind sensors
+# wind.od.ua  Backend side of custom made wind sensors
